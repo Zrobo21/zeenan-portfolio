@@ -1,0 +1,52 @@
+{
+  "_readme": "This is the knowledge base for the site's chat assistant. Add or edit entries here — each has keywords to match against a visitor's question, and an answer the bot will give. No sensitive personal data belongs here (no ID numbers, family details, addresses, or anything not meant to be public — this file is publicly readable by anyone who views the site's source).",
+
+  "identity": {
+    "keywords": ["who are you", "your name", "who is zeenan", "about you", "who made this"],
+    "answer": "I'm Zeenan's assistant! Haa Meem Ul Karim Zeenan (goes by Zeenan) is a Digital Marketing Expert & Consultant, NSDA Level 3 certified, working with clients across Europe, America, and Asia."
+  },
+  "services": {
+    "keywords": ["services", "what do you offer", "what can you do", "help with", "what does zeenan do"],
+    "answer": "Zeenan offers SEO (search engine optimization), content strategy & writing, keyword research, and social media marketing. Want to book a consultation? I can take you to the appointment form."
+  },
+  "certifications": {
+    "keywords": ["certified", "certification", "qualification", "nsda", "credentials"],
+    "answer": "Zeenan holds an NSDA (National Skills Development Authority, Bangladesh Government) Level 3 certification in Digital Marketing for Freelancing, plus a Professional Digital Marketing certificate (Grade A+) from Creative IT Institute. Check the Certifications section for the full details."
+  },
+  "location": {
+    "keywords": ["where are you based", "location", "which country", "based in"],
+    "answer": "Zeenan is based in Bangladesh and works with clients across Europe, America, and Asia — fully remote, so location isn't a barrier."
+  },
+  "contact": {
+    "keywords": ["contact", "email", "reach", "phone number", "whatsapp", "get in touch"],
+    "answer": "You can reach Zeenan by email at haameemulkarim.zeenan.dm@gmail.com, on WhatsApp, or through the appointment form on this site — I can take you there now if you'd like."
+  },
+  "appointment": {
+    "keywords": ["book", "appointment", "consultation", "meeting", "schedule a call", "hire"],
+    "answer": "You can apply for an appointment right on this site — I'll scroll you to the form. Just fill in your name, WhatsApp number, email, purpose, and goal, and Zeenan will get back to you within 1-2 business days."
+  },
+  "pricing": {
+    "keywords": ["price", "cost", "how much", "rate", "charge", "fee"],
+    "answer": "Pricing depends on the scope of work — every project is a little different. The best way to get an accurate quote is to book a quick consultation through the appointment form so Zeenan can understand what you need."
+  },
+  "seo_general": {
+    "keywords": ["what is seo", "seo mean", "search engine optimization"],
+    "answer": "SEO (Search Engine Optimization) is the practice of improving a website so it ranks higher in search results and gets found by the right people. There's a whole blog on this site with practical SEO guides if you want to dig deeper!"
+  },
+  "keyword_research": {
+    "keywords": ["keyword research", "keywords", "find keywords"],
+    "answer": "Keyword research means figuring out exactly what your potential customers type into Google, so your content targets real search demand instead of guesswork. Check the Projects section for a sample of what this looks like in practice."
+  },
+  "blog": {
+    "keywords": ["blog", "articles", "read more", "learn seo"],
+    "answer": "There's a full blog on this site covering SEO, keyword research, and digital marketing tips — great if you want to learn the fundamentals yourself. Want me to take you there?"
+  },
+  "worldwide": {
+    "keywords": ["worldwide", "international", "other countries", "outside bangladesh", "global clients"],
+    "answer": "Yes — Zeenan works with clients across Europe, America, and Asia, not just Bangladesh. All work is done remotely, so distance isn't an issue."
+  },
+  "response_time": {
+    "keywords": ["how long", "reply time", "response time", "when will you reply"],
+    "answer": "Zeenan typically responds within 1-2 business days after you submit the appointment form."
+  }
+}

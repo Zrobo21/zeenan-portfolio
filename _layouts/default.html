@@ -28,6 +28,37 @@
   <meta name="twitter:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
   <meta name="twitter:description" content="{% if page.description %}{{ page.description }}{% elsif page.excerpt %}{{ page.excerpt | strip_html | truncate: 155 }}{% else %}{{ site.description }}{% endif %}">
   {% seo %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "Zeenan Digital Marketing",
+    "founder": {
+      "@type": "Person",
+      "name": "Haa Meem Ul Karim Zeenan",
+      "alternateName": "Zeenan",
+      "jobTitle": "Digital Marketing Expert & Consultant",
+      "email": "haameemulkarim.zeenan.dm@gmail.com",
+      "sameAs": [
+        "https://www.linkedin.com/in/haa-meem-ul-karim-zeenan-2135b4396/",
+        "https://www.facebook.com/haameemulkarimzeenan/"
+      ],
+      "hasCredential": {
+        "@type": "EducationalOccupationalCredential",
+        "credentialCategory": "certificate",
+        "name": "Digital Marketing for Freelancing, Level 3",
+        "recognizedBy": {
+          "@type": "Organization",
+          "name": "National Skills Development Authority (NSDA), Bangladesh"
+        }
+      }
+    },
+    "areaServed": ["Europe", "North America", "Asia"],
+    "serviceType": ["SEO", "Content Strategy", "Keyword Research", "Social Media Marketing"],
+    "url": "{{ site.url }}{{ site.baseurl }}/",
+    "email": "haameemulkarim.zeenan.dm@gmail.com"
+  }
+  </script>
   {% if site.cloudflare_analytics_token %}
   <!-- Cloudflare Web Analytics: cookieless, no personal data collected,
        counts page views and popular pages only. See footer privacy note. -->
@@ -46,6 +77,7 @@
         <li><a href="{{ '/' | relative_url }}#about">About</a></li>
         <li><a href="{{ '/' | relative_url }}#certifications">Certs</a></li>
         <li><a href="{{ '/' | relative_url }}#gallery">Gallery</a></li>
+        <li><a href="{{ '/' | relative_url }}#projects">Projects</a></li>
         <li><a href="{{ '/' | relative_url }}#services">Services</a></li>
         <li><a href="{{ '/' | relative_url }}#appointment">Book Now</a></li>
         <li><a href="{{ '/blog/' | relative_url }}">Blog</a></li>
@@ -60,12 +92,35 @@
 
   <footer>
     <div class="wrap">
-      © {{ 'now' | date: "%Y" }} {{ site.author }} — Digital Marketing Consultant, serving clients across Europe, America & Asia
+      © {{ 'now' | date: "%Y" }} {{ site.author }} — Digital Marketing Expert & Consultant, serving clients across Europe, America & Asia
       <div style="margin-top:8px;font-size:11px;opacity:0.6;">
         This site uses cookieless, anonymous page-view analytics to see which posts are useful. No personal data is collected or sold.
       </div>
     </div>
   </footer>
+
+  <!-- AI Assistant Widget -->
+  <div class="bot-widget">
+    <div class="bot-chat-window" id="botChatWindow">
+      <div class="bot-chat-header">
+        <img src="{{ '/assets/images/bot-avatar.png' | relative_url }}" alt="Zeenan's Assistant">
+        <div>
+          <div class="bot-chat-header-name">Zeenan's Assistant</div>
+          <div class="bot-chat-header-status">● Online</div>
+        </div>
+        <button class="bot-chat-close" id="botChatClose" aria-label="Close chat">✕</button>
+      </div>
+      <div class="bot-chat-messages" id="botChatMessages"></div>
+      <div class="bot-chat-input-row">
+        <input type="text" id="botChatInput" placeholder="Ask me anything..." autocomplete="off">
+        <button class="bot-chat-send" id="botChatSend" aria-label="Send">➤</button>
+      </div>
+    </div>
+    <div class="bot-intro-bubble" id="botIntroBubble">Need any help? Zeenan's here 👋</div>
+    <button class="bot-avatar-btn" id="botAvatarBtn" aria-label="Open chat assistant">
+      <img src="{{ '/assets/images/bot-avatar.png' | relative_url }}" alt="Chat assistant">
+    </button>
+  </div>
 
   <script src="{{ '/assets/js/main.js' | relative_url }}"></script>
 </body>

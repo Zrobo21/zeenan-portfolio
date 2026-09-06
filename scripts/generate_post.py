@@ -40,6 +40,18 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 GEMINI_MODEL = "gemini-3.6-flash"
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
 
+# Optional featured-image generation. Set GENERATE_IMAGES=true as a workflow
+# env var to turn this on. Uses a separate image-capable Gemini model.
+# Note: like all Gemini-generated images, these carry Google's invisible
+# SynthID watermark embedded in the pixel data by design (for AI-content
+# transparency) -- this is not a visible logo and cannot be stripped without
+# defeating a safety feature, which this script does not attempt. To the
+# human eye the images are clean; there is no visible watermark/logo overlay.
+GENERATE_IMAGES = os.environ.get("GENERATE_IMAGES", "false").lower() == "true"
+GEMINI_IMAGE_MODEL = "gemini-3.1-flash-image"
+GEMINI_IMAGE_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_IMAGE_MODEL}:generateContent?key={GEMINI_API_KEY}"
+IMAGES_DIR_REL = "assets/images/blog"
+
 QUALITY_BAR = 8.0  # average score (out of 10) required across all dimensions
 MAX_REWRITE_PASSES = 2  # editor pass + up to this many additional rewrite passes
 
@@ -281,81 +293,151 @@ def slugify(title):
     return slug[:70]
 
 
+def generate_featured_image(title, keyword):
+    """Generates an optional featured image for a post via Gemini's image
+    model, saves it under assets/images/blog/, and returns the relative path
+    (or None if generation is disabled or fails). Failure here never breaks
+    the post -- the post still publishes without an image."""
+    if not GENERATE_IMAGES:
+        return None
+
+    prompt = (
+        f"A clean, professional blog header illustration representing the topic: "
+        f"'{title}'. Flat modern digital marketing / SEO themed illustration style, "
+        f"dark background with green and gold accent colors, no text overlay, "
+        f"no logos, no brand names, widescreen composition suitable for a blog "
+        f"header image."
+    )
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"responseModalities": ["IMAGE"]},
+    }
+    req = urllib.request.Request(
+        GEMINI_IMAGE_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=90) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        parts = data["candidates"][0]["content"]["parts"]
+        image_b64 = None
+        for part in parts:
+            if "inlineData" in part:
+                image_b64 = part["inlineData"]["data"]
+                break
+        if not image_b64:
+            print("Image generation: no image data in response, skipping image.")
+            return None
+
+        import base64
+        image_bytes = base64.b64decode(image_b64)
+        images_dir_abs = os.path.join(REPO_ROOT, IMAGES_DIR_REL)
+        os.makedirs(images_dir_abs, exist_ok=True)
+        image_filename = f"{datetime.date.today().isoformat()}-{slugify(title)}.png"
+        image_path_abs = os.path.join(images_dir_abs, image_filename)
+        with open(image_path_abs, "wb") as f:
+            f.write(image_bytes)
+        print(f"Generated featured image: {image_path_abs}")
+        return f"/{IMAGES_DIR_REL}/{image_filename}"
+    except Exception as e:
+        print(f"Image generation failed (non-fatal, post continues without image): {e}")
+        return None
+
+
 def main():
-    keywords = load_keywords()
-    if not keywords:
-        print("No keywords left in keywords.txt — add more before the next run.")
-        sys.exit(0)
+    posts_per_run = int(os.environ.get("POSTS_PER_RUN", "1"))
+    posts_written = 0
 
-    keyword = keywords[0]
-    remaining = keywords[1:]
-
-    print(f"Generating post for keyword: {keyword}")
-    prompt = PROMPT_TEMPLATE.format(site_context=SITE_CONTEXT, keyword=keyword)
-    raw = call_gemini(prompt)
-    post = extract_json(raw)
-
-    meta_description = post.get("meta_description", "").strip()
-    tags = post.get("tags", [])
-    title = post["title"].strip()
-    body = post["body_markdown"].strip()
-
-    all_passes = []
-    revision_focus = ""
-
-    for pass_num in range(1, MAX_REWRITE_PASSES + 2):  # editor pass + rewrite passes
-        print(f"Running review pass {pass_num}...")
-        title, body, issues, scores = run_editor_pass(keyword, title, body, revision_focus)
-        avg = average_score(scores)
-        all_passes.append({"pass": pass_num, "scores": scores, "issues": issues, "average": avg})
-
-        if scores:
-            print(f"Pass {pass_num} average score: {round(avg, 1)}/10  scores: {scores}")
-        if issues:
-            print(f"Pass {pass_num} issues: {issues}")
-
-        if avg >= QUALITY_BAR or not scores:
-            # Either it passed the bar, or scoring failed and we fall back to
-            # whatever draft we have rather than looping forever.
+    for i in range(posts_per_run):
+        keywords = load_keywords()
+        if not keywords:
+            print("No keywords left in keywords.txt — add more before the next run.")
             break
 
-        weak = weak_dimensions(scores)
-        if not weak or pass_num > MAX_REWRITE_PASSES:
-            break
+        keyword = keywords[0]
+        remaining = keywords[1:]
 
-        revision_focus = (
-            f"\nThe previous pass scored below the quality bar on: {', '.join(weak)}. "
-            f"Focus this rewrite specifically on fixing those dimensions without breaking what "
-            f"already scored well.\n"
+        print(f"\n=== Post {i + 1} of {posts_per_run} — keyword: {keyword} ===")
+        prompt = PROMPT_TEMPLATE.format(site_context=SITE_CONTEXT, keyword=keyword)
+        raw = call_gemini(prompt)
+        post = extract_json(raw)
+
+        meta_description = post.get("meta_description", "").strip()
+        tags = post.get("tags", [])
+        title = post["title"].strip()
+        body = post["body_markdown"].strip()
+
+        all_passes = []
+        revision_focus = ""
+
+        for pass_num in range(1, MAX_REWRITE_PASSES + 2):  # editor pass + rewrite passes
+            print(f"Running review pass {pass_num}...")
+            title, body, issues, scores = run_editor_pass(keyword, title, body, revision_focus)
+            avg = average_score(scores)
+            all_passes.append({"pass": pass_num, "scores": scores, "issues": issues, "average": avg})
+
+            if scores:
+                print(f"Pass {pass_num} average score: {round(avg, 1)}/10  scores: {scores}")
+            if issues:
+                print(f"Pass {pass_num} issues: {issues}")
+
+            if avg >= QUALITY_BAR or not scores:
+                break
+
+            weak = weak_dimensions(scores)
+            if not weak or pass_num > MAX_REWRITE_PASSES:
+                break
+
+            revision_focus = (
+                f"\nThe previous pass scored below the quality bar on: {', '.join(weak)}. "
+                f"Focus this rewrite specifically on fixing those dimensions without breaking what "
+                f"already scored well.\n"
+            )
+
+        final_avg = all_passes[-1]["average"] if all_passes else 0.0
+        print(f"Final quality score after {len(all_passes)} pass(es): {round(final_avg, 1)}/10")
+
+        image_path = generate_featured_image(title, keyword)
+
+        # Use a distinct timestamp-based filename suffix so multiple posts
+        # generated in the same run (same date) never collide.
+        today = datetime.date.today().isoformat()
+        slug = slugify(title)
+        filename = f"{today}-{slug}.md"
+        filepath = os.path.join(POSTS_DIR, filename)
+        # If a file with this exact name already exists (e.g. two similarly
+        # titled posts in the same run), disambiguate with a numeric suffix.
+        counter = 2
+        while os.path.exists(filepath):
+            filename = f"{today}-{slug}-{counter}.md"
+            filepath = os.path.join(POSTS_DIR, filename)
+            counter += 1
+
+        front_matter_tags = ", ".join(f'"{t}"' for t in tags)
+        image_front_matter = f'image: "{image_path}"\n' if image_path else ""
+        front_matter = (
+            "---\n"
+            f'title: "{title.replace(chr(34), chr(39))}"\n'
+            f"date: {today}\n"
+            f"description: \"{meta_description.replace(chr(34), chr(39))}\"\n"
+            f"tags: [{front_matter_tags}]\n"
+            f"{image_front_matter}"
+            "---\n\n"
         )
 
-    final_avg = all_passes[-1]["average"] if all_passes else 0.0
-    print(f"Final quality score after {len(all_passes)} pass(es): {round(final_avg, 1)}/10")
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(front_matter + body + "\n")
 
-    today = datetime.date.today().isoformat()
-    slug = slugify(title)
-    filename = f"{today}-{slug}.md"
-    filepath = os.path.join(POSTS_DIR, filename)
+        print(f"Wrote new post: {filepath}")
 
-    front_matter_tags = ", ".join(f'"{t}"' for t in tags)
-    front_matter = (
-        "---\n"
-        f'title: "{title.replace(chr(34), chr(39))}"\n'
-        f"date: {today}\n"
-        f"description: \"{meta_description.replace(chr(34), chr(39))}\"\n"
-        f"tags: [{front_matter_tags}]\n"
-        "---\n\n"
-    )
+        log_review(keyword, all_passes, filename)
+        save_remaining_keywords(remaining)
+        posts_written += 1
+        print(f"{len(remaining)} keyword(s) left in queue.")
 
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write(front_matter + body + "\n")
-
-    print(f"Wrote new post: {filepath}")
-
-    log_review(keyword, all_passes, filename)
-
-    save_remaining_keywords(remaining)
-    print(f"{len(remaining)} keyword(s) left in queue.")
+    print(f"\n=== Done: {posts_written} post(s) written this run ===")
 
 
 if __name__ == "__main__":
