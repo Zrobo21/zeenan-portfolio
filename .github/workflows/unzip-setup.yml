@@ -1,0 +1,34 @@
+name: One-Time Unzip Setup
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Unzip site package
+        run: |
+          if [ ! -f gta-portfolio-site.zip ]; then
+            echo "ERROR: gta-portfolio-site.zip not found in repo root."
+            exit 1
+          fi
+          unzip -o gta-portfolio-site.zip
+          shopt -s dotglob
+          mv gta-portfolio/* .
+          rmdir gta-portfolio
+          rm gta-portfolio-site.zip
+
+      - name: Commit extracted files
+        run: |
+          git config user.name "setup-bot"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -m "Extract site files from zip package"
+          git push
