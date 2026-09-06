@@ -186,7 +186,82 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (introBubble) introBubble.addEventListener('click', openChat);
+
+    // --- Draggable widget ---
+    // Lets the visitor reposition the bot anywhere on screen. A short drag
+    // (below the threshold) is still treated as a click/tap to open the chat.
+    var widget = document.querySelector('.bot-widget');
+    var isDragging = false;
+    var dragMoved = false;
+    var startX, startY, startRight, startBottom;
+    var DRAG_THRESHOLD = 6; // px of movement before it counts as a drag, not a tap
+
+    function clampPosition(right, bottom) {
+      var margin = 8;
+      var maxRight = window.innerWidth - widget.offsetWidth - margin;
+      var maxBottom = window.innerHeight - widget.offsetHeight - margin;
+      return {
+        right: Math.min(Math.max(right, margin), Math.max(maxRight, margin)),
+        bottom: Math.min(Math.max(bottom, margin), Math.max(maxBottom, margin))
+      };
+    }
+
+    function onDragStart(clientX, clientY) {
+      isDragging = true;
+      dragMoved = false;
+      startX = clientX;
+      startY = clientY;
+      var rect = widget.getBoundingClientRect();
+      startRight = window.innerWidth - rect.right;
+      startBottom = window.innerHeight - rect.bottom;
+    }
+
+    function onDragMove(clientX, clientY) {
+      if (!isDragging) return;
+      var dx = clientX - startX;
+      var dy = clientY - startY;
+      if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+        dragMoved = true;
+      }
+      if (dragMoved) {
+        var next = clampPosition(startRight - dx, startBottom - dy);
+        widget.style.right = next.right + 'px';
+        widget.style.bottom = next.bottom + 'px';
+      }
+    }
+
+    function onDragEnd() {
+      isDragging = false;
+    }
+
+    avatarBtn.addEventListener('pointerdown', function (e) {
+      onDragStart(e.clientX, e.clientY);
+      avatarBtn.setPointerCapture && avatarBtn.setPointerCapture(e.pointerId);
+    });
+    avatarBtn.addEventListener('pointermove', function (e) {
+      onDragMove(e.clientX, e.clientY);
+    });
+    avatarBtn.addEventListener('pointerup', function () {
+      onDragEnd();
+    });
+    avatarBtn.addEventListener('pointercancel', onDragEnd);
+
+    // Keep the widget on-screen if the window is resized/rotated.
+    window.addEventListener('resize', function () {
+      var rect = widget.getBoundingClientRect();
+      var currentRight = window.innerWidth - rect.right;
+      var currentBottom = window.innerHeight - rect.bottom;
+      var next = clampPosition(currentRight, currentBottom);
+      widget.style.right = next.right + 'px';
+      widget.style.bottom = next.bottom + 'px';
+    });
+
     avatarBtn.addEventListener('click', function () {
+      if (dragMoved) {
+        // This click was the tail end of a drag — don't also open the chat.
+        dragMoved = false;
+        return;
+      }
       if (chatWindow.classList.contains('open')) {
         closeChat();
       } else {
@@ -241,22 +316,47 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function findAnswer(question, data) {
       var q = question.toLowerCase();
+      // Strip common punctuation so "help?" matches "help".
+      var qClean = q.replace(/[?!.,]/g, ' ').replace(/\s+/g, ' ').trim();
+      var qWords = qClean.split(' ').filter(function (w) { return w.length > 2; });
+
       var bestMatch = null;
       var bestScore = 0;
+
       Object.keys(data).forEach(function (key) {
         if (key === '_readme') return;
         var entry = data[key];
         if (!entry.keywords) return;
+
         var score = 0;
-        entry.keywords.forEach(function (kw) {
-          if (q.indexOf(kw.toLowerCase()) !== -1) score += kw.length; // longer matches weigh more
+        entry.keywords.forEach(function (kwPhrase) {
+          var kw = kwPhrase.toLowerCase();
+          // Exact phrase match is the strongest signal.
+          if (qClean.indexOf(kw) !== -1) {
+            score += kw.length * 2;
+            return;
+          }
+          // Otherwise score by how many of the keyword phrase's words
+          // appear anywhere in the question — catches rephrased or
+          // partial questions like "what can u help me do" matching
+          // "what can you help".
+          var kwWords = kw.split(' ').filter(function (w) { return w.length > 2; });
+          if (kwWords.length === 0) return;
+          var matchedWords = kwWords.filter(function (w) { return qWords.indexOf(w) !== -1; });
+          if (matchedWords.length > 0) {
+            score += (matchedWords.length / kwWords.length) * kw.length;
+          }
         });
+
         if (score > bestScore) {
           bestScore = score;
           bestMatch = entry.answer;
         }
       });
-      return bestMatch;
+
+      // Require a minimum confidence so unrelated short questions don't
+      // accidentally latch onto a weakly-related entry.
+      return bestScore >= 4 ? bestMatch : null;
     }
 
     function handleUserQuestion(question) {
@@ -279,7 +379,23 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      loadKnowledge(function (data) {
+    // Words that suggest a question is even loosely about this site's
+    // domain (marketing, the business, or Zeenan). If a question matches
+    // none of these AND finds no knowledge-base answer, it's treated as
+    // off-topic and gets a polite decline instead of a generic "I don't know".
+    var RELEVANCE_HINTS = [
+      'seo', 'market', 'zeenan', 'service', 'price', 'cost', 'book', 'appoint',
+      'contact', 'certif', 'nsda', 'keyword', 'blog', 'project', 'business',
+      'website', 'content', 'social', 'consult', 'hire', 'client', 'help',
+      'work', 'email', 'whatsapp', 'location', 'based', 'experience'
+    ];
+
+    function isLikelyOffTopic(question) {
+      var q = question.toLowerCase();
+      return !RELEVANCE_HINTS.some(function (hint) { return q.indexOf(hint) !== -1; });
+    }
+
+    loadKnowledge(function (data) {
         if (!data) {
           setTimeout(function () {
             addBotMessage("I'm having trouble reaching my knowledge base right now — try the contact section to reach Zeenan directly!");
@@ -290,8 +406,10 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(function () {
           if (answer) {
             addBotMessage(answer);
+          } else if (isLikelyOffTopic(question)) {
+            addBotMessage("Sorry, that's outside what I can help with — I'm here for questions about Zeenan's services, pricing, certifications, or booking a consultation. Anything along those lines I can help with?");
           } else {
-            addBotMessage("I don't have a specific answer for that, but Zeenan can help directly — want me to take you to the contact section, or would you like to book a consultation?");
+            addBotMessage("I don't have a specific answer for that yet — try asking about services, pricing, certifications, or how to book a consultation. Or I can take you straight to the contact section if you'd like to ask Zeenan directly!");
           }
           // Occasionally close out with a warm sign-off after a real answer.
           if (answer && Math.random() < 0.3) {
@@ -361,17 +479,22 @@ document.addEventListener('DOMContentLoaded', function () {
     el.addEventListener('click', function () { playSound('click'); });
   });
 
-  // Soft hover sound on nav links and cards (throttled so it's not annoying)
-  var lastHover = 0;
-  document.querySelectorAll('.nav-links a, .mission-card, .cert-card, .gallery-item').forEach(function (el) {
-    el.addEventListener('mouseenter', function () {
-      var now = Date.now();
-      if (now - lastHover > 400) {
-        playSound('hover');
-        lastHover = now;
-      }
+  // Soft hover sound on nav links and cards — desktop/mouse only.
+  // Guarded so touch devices (phones/tablets) never trigger this, since
+  // touch-scroll can sometimes fire hover-like events unexpectedly.
+  var supportsHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (supportsHover) {
+    var lastHover = 0;
+    document.querySelectorAll('.nav-links a, .mission-card, .cert-card, .gallery-item').forEach(function (el) {
+      el.addEventListener('mouseenter', function () {
+        var now = Date.now();
+        if (now - lastHover > 400) {
+          playSound('hover');
+          lastHover = now;
+        }
+      });
     });
-  });
+  }
 
   /* ---------- SCROLL REVEAL ANIMATIONS ---------- */
   var revealTargets = document.querySelectorAll(
@@ -393,9 +516,9 @@ document.addEventListener('DOMContentLoaded', function () {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('in-view');
-          if (entry.target.classList.contains('section-head')) {
-            playSound('notify');
-          }
+          // Note: no sound plays here on purpose — a chime firing every
+          // time a section scrolls into view (9+ times per scroll session)
+          // was overwhelming. Sound stays reserved for clicks and the bot.
           observer.unobserve(entry.target);
         }
       });

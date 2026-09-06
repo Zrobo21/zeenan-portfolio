@@ -11,18 +11,42 @@ layout: default
   "description": {{ page.description | default: page.excerpt | strip_html | truncate: 155 | jsonify }},
   "datePublished": "{{ page.date | date_to_xmlschema }}",
   "dateModified": "{{ page.date | date_to_xmlschema }}",
+  "inLanguage": "en",
   "author": {
     "@type": "Person",
     "name": "{{ site.author }}",
     "alternateName": "Zeenan",
     "jobTitle": "Digital Marketing Expert & Consultant",
-    "url": "{{ site.url }}{{ site.baseurl }}/"
+    "url": "{{ site.url }}{{ site.baseurl }}/",
+    "email": "haameemulkarim.zeenan.dm@gmail.com",
+    "sameAs": [
+      "https://www.linkedin.com/in/haa-meem-ul-karim-zeenan-2135b4396/",
+      "https://www.facebook.com/haameemulkarimzeenan/"
+    ],
+    "hasCredential": {
+      "@type": "EducationalOccupationalCredential",
+      "credentialCategory": "certificate",
+      "name": "Digital Marketing for Freelancing, Level 3",
+      "recognizedBy": {
+        "@type": "Organization",
+        "name": "National Skills Development Authority (NSDA), Bangladesh"
+      }
+    },
+    "knowsAbout": ["SEO", "Keyword Research", "Content Strategy", "Social Media Marketing", "Digital Marketing"]
   },
   "publisher": {
     "@type": "Person",
-    "name": "{{ site.author }}"
+    "name": "{{ site.author }}",
+    "url": "{{ site.url }}{{ site.baseurl }}/"
   },
-  "mainEntityOfPage": "{{ page.url | absolute_url }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ page.url | absolute_url }}"
+  },
+  "about": {
+    "@type": "Thing",
+    "name": "Digital Marketing"
+  },
   "keywords": "{% if page.tags %}{{ page.tags | join: ', ' }}{% endif %}"
 }
 </script>

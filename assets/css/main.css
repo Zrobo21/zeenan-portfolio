@@ -37,6 +37,7 @@
     repeating-linear-gradient(135deg, #ece7d8 0px, #ece7d8 2px, #f4f1e8 2px, #f4f1e8 40px);
 }
 
+[data-theme="day"] .nav-logo span { color: #2f5210; font-weight: 700; }
 [data-theme="day"] .cert-image { background: #f4f1e8; }
 
 [data-theme="day"] .hero-portrait-wrap::before {
@@ -273,7 +274,7 @@ a:hover { text-decoration: underline; }
 
 /* ---------- HERO ---------- */
 .hero {
-  min-height: 88vh;
+  min-height: auto;
   display: flex;
   align-items: center;
   position: relative;
@@ -281,7 +282,10 @@ a:hover { text-decoration: underline; }
   background:
     linear-gradient(180deg, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.95) 100%),
     repeating-linear-gradient(135deg, #111 0px, #111 2px, #0a0a0a 2px, #0a0a0a 40px);
-  padding: 60px 0;
+  padding: 40px 0;
+}
+@media (min-width: 640px) {
+  .hero { min-height: 88vh; padding: 60px 0; }
 }
 .hero-grid {
   display: grid;
@@ -369,29 +373,38 @@ a:hover { text-decoration: underline; }
 
 /* ---------- STARS / STAT BAR ---------- */
 .stat-bar {
-  display: flex;
-  gap: 40px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
   margin-top: 48px;
   padding-top: 28px;
   border-top: 1px solid var(--line);
 }
+@media (min-width: 640px) {
+  .stat-bar { grid-template-columns: repeat(3, auto); gap: 40px; justify-content: start; }
+}
 .stat-num {
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: clamp(26px, 6vw, 34px);
   color: var(--gold);
   line-height: 1;
 }
 .stat-label {
   font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 1px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
   color: var(--ink-dim);
   margin-top: 6px;
 }
+@media (min-width: 640px) {
+  .stat-label { font-size: 12px; letter-spacing: 1px; }
+}
 
 /* ---------- SECTION ---------- */
-section { padding: 96px 0; border-bottom: 1px solid var(--line); }
+section { padding: 56px 0; border-bottom: 1px solid var(--line); }
+@media (min-width: 640px) {
+  section { padding: 96px 0; }
+}
 .section-head { margin-bottom: 48px; }
 .section-label {
   font-family: var(--font-mono);
@@ -494,7 +507,10 @@ section { padding: 96px 0; border-bottom: 1px solid var(--line); }
 .keyword-sample-card {
   background: var(--bg-card);
   border: 1px solid var(--line);
-  padding: 28px;
+  padding: 20px;
+}
+@media (min-width: 640px) {
+  .keyword-sample-card { padding: 28px; }
 }
 .keyword-sample-card h4 {
   font-family: var(--font-display);
@@ -503,8 +519,13 @@ section { padding: 96px 0; border-bottom: 1px solid var(--line); }
   color: var(--gold);
   letter-spacing: 0.5px;
 }
+.keyword-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .keyword-table {
   width: 100%;
+  min-width: 480px;
   border-collapse: collapse;
   font-size: 14px;
 }
@@ -543,13 +564,20 @@ section { padding: 96px 0; border-bottom: 1px solid var(--line); }
 /* ---------- CHAT ASSISTANT WIDGET ---------- */
 .bot-widget {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 100;
+  bottom: 90px;
+  right: 20px;
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 12px;
+  gap: 10px;
+  /* Forces the browser to composite this on its own GPU layer, which fixes
+     the "lags behind / drops during scroll" jitter some Android browsers
+     show with plain position:fixed. */
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  touch-action: none;
 }
 
 .bot-intro-bubble {
@@ -573,18 +601,19 @@ section { padding: 96px 0; border-bottom: 1px solid var(--line); }
 }
 
 .bot-avatar-btn {
-  width: 68px;
-  height: 68px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   border: 2px solid var(--green);
   background: var(--bg-card);
-  cursor: pointer;
+  cursor: grab;
   overflow: hidden;
   padding: 0;
   box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   transition: transform 0.2s ease, border-color 0.2s ease;
   position: relative;
 }
+.bot-avatar-btn:active { cursor: grabbing; }
 .bot-avatar-btn:hover { transform: scale(1.06); border-color: var(--gold); }
 .bot-avatar-btn img {
   width: 100%;
