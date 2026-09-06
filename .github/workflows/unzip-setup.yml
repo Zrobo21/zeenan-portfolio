@@ -1,14 +1,23 @@
 name: One-Time Unzip Setup
 
 on:
+  push:
+    branches: ["main"]
+    paths:
+      - "gta-portfolio-site.zip"
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
+concurrency:
+  group: unzip-setup
+  cancel-in-progress: false
+
 jobs:
   unzip:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -16,8 +25,8 @@ jobs:
       - name: Unzip site package (merges into existing folders, overwrites matching files)
         run: |
           if [ ! -f gta-portfolio-site.zip ]; then
-            echo "ERROR: gta-portfolio-site.zip not found in repo root."
-            exit 1
+            echo "No zip file found — nothing to do."
+            exit 0
           fi
           unzip -o gta-portfolio-site.zip -d _extracted_tmp
           rsync -a _extracted_tmp/gta-portfolio/ ./
@@ -29,5 +38,5 @@ jobs:
           git config user.name "setup-bot"
           git config user.email "actions@github.com"
           git add -A
-          git diff --staged --quiet && echo "No changes to commit" || git commit -m "Extract/update site files from zip package"
+          git diff --staged --quiet && echo "No changes to commit" || git commit -m "Auto-extract: updated site files from uploaded zip"
           git push
