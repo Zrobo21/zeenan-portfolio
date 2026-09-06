@@ -1,0 +1,39 @@
+name: Auto Blog Post
+
+on:
+  schedule:
+    - cron: "0 6 * * 0,3"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: auto-blog-post
+  cancel-in-progress: false
+
+jobs:
+  generate-post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate new blog post
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python scripts/generate_post.py
+
+      - name: Commit and push new post
+        run: |
+          git config user.name "auto-blog-bot"
+          git config user.email "actions@github.com"
+          git add _posts/ scripts/keywords.txt _data/review_log.yml
+          git diff --staged --quiet && echo "No changes to commit" || git commit -m "Auto: new blog post"
+          git push
