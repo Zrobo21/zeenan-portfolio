@@ -1,0 +1,3 @@
+{
+  "_readme": "This file holds ONLY aggregate tag names and view counts, e.g. {\"SEO\": 340, \"Bangladesh\": 210}. No personal data, no visitor identifiers, ever. To fill it in: check your free Cloudflare Web Analytics dashboard (or any analytics you set up) once a month, roughly total up views per tag across your posts, and update the numbers below by hand. Then run scripts/reprioritize_keywords.py once. Leave this as just the _readme key if you don't want to bother -- the auto-blog system works fine without this."
+}

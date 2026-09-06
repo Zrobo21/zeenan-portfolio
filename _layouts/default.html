@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>{% if page.title %}{{ page.title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  <meta name="description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | truncate: 155 }}{% else %}{{ site.description }}{% endif %}">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+  <script>
+    // Applied before first paint to avoid a flash of the wrong theme.
+    (function () {
+      try {
+        var saved = localStorage.getItem('zeenan_theme');
+        if (saved === 'day') {
+          document.documentElement.setAttribute('data-theme', 'day');
+        }
+      } catch (e) { /* localStorage unavailable — default night mode stays */ }
+    })();
+  </script>
+  <meta property="og:type" content="{% if page.layout == 'post' %}article{% else %}website{% endif %}">
+  <meta property="og:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
+  <meta property="og:description" content="{% if page.description %}{{ page.description }}{% elsif page.excerpt %}{{ page.excerpt | strip_html | truncate: 155 }}{% else %}{{ site.description }}{% endif %}">
+  <meta property="og:url" content="{{ page.url | absolute_url }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
+  <meta name="twitter:description" content="{% if page.description %}{{ page.description }}{% elsif page.excerpt %}{{ page.excerpt | strip_html | truncate: 155 }}{% else %}{{ site.description }}{% endif %}">
+  {% seo %}
+  {% if site.cloudflare_analytics_token %}
+  <!-- Cloudflare Web Analytics: cookieless, no personal data collected,
+       counts page views and popular pages only. See footer privacy note. -->
+  <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+    data-cf-beacon='{"token": "{{ site.cloudflare_analytics_token }}"}'></script>
+  {% endif %}
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="{{ '/' | relative_url }}" class="nav-logo">ZEE<span>NAN</span></a>
+      <button class="nav-toggle" aria-label="Toggle menu">☰</button>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle day/night mode" title="Toggle day/night mode">🌙</button>
+      <button class="sound-toggle" id="soundToggle" aria-label="Toggle sound" title="Toggle sound effects">🔊</button>
+      <ul class="nav-links">
+        <li><a href="{{ '/' | relative_url }}#about">About</a></li>
+        <li><a href="{{ '/' | relative_url }}#certifications">Certs</a></li>
+        <li><a href="{{ '/' | relative_url }}#gallery">Gallery</a></li>
+        <li><a href="{{ '/' | relative_url }}#services">Services</a></li>
+        <li><a href="{{ '/' | relative_url }}#appointment">Book Now</a></li>
+        <li><a href="{{ '/blog/' | relative_url }}">Blog</a></li>
+        <li><a href="{{ '/' | relative_url }}#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    {{ content }}
+  </main>
+
+  <footer>
+    <div class="wrap">
+      © {{ 'now' | date: "%Y" }} {{ site.author }} — Digital Marketing Consultant, Dhaka, Bangladesh
+      <div style="margin-top:8px;font-size:11px;opacity:0.6;">
+        This site uses cookieless, anonymous page-view analytics to see which posts are useful. No personal data is collected or sold.
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ '/assets/js/main.js' | relative_url }}"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+---
+layout: default
+title: Blog
+permalink: /blog/
+---
+<section class="wrap" style="padding-top:64px;">
+  <div class="section-head">
+    <p class="section-label">INTEL FEED</p>
+    <h2 class="section-title">All Posts</h2>
+  </div>
+  <div class="post-list">
+    {% for post in site.posts %}
+    <a href="{{ post.url | relative_url }}" class="post-row" style="text-decoration:none;color:inherit;">
+      <div>
+        <div class="post-title">{{ post.title }}</div>
+        <div class="post-excerpt">{{ post.excerpt | strip_html | truncate: 130 }}</div>
+      </div>
+      <div class="post-date">{{ post.date | date: "%b %-d, %Y" }}</div>
+    </a>
+    {% else %}
+    <p style="color:var(--ink-dim);">No posts yet — first one drops soon.</p>
+    {% endfor %}
+  </div>
+</section>

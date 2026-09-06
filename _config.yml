@@ -1,0 +1,34 @@
+title: "ZEENAN | DIGITAL MARKETING"
+description: "Digital Marketing Consultant — NSDA Level 3 Certified"
+author: "Haa Meem Ul Karim Zeenan"
+baseurl: ""
+url: ""
+
+# Optional: get a free token from https://dash.cloudflare.com > Analytics > Web Analytics
+# Paste it below (as text) to turn on anonymous, cookieless page-view analytics.
+# Leave blank to keep analytics off entirely.
+cloudflare_analytics_token: ""
+
+markdown: kramdown
+permalink: /blog/:title/
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+collections:
+  posts:
+    output: true
+
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+
+exclude:
+  - scripts/
+  - README.md
+  - requirements.txt
