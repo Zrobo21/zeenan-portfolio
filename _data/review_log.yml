@@ -1,0 +1,14 @@
+- date: "2026-09-06"
+  keyword: "how to rank a new website on Google"
+  file: "2026-09-06-how-to-rank-a-new-website-on-google-step-by-step.md"
+  passes_run: 1
+  pass_details:
+    - pass: 1
+      average_score: 9.8
+      scores:
+        seo_structure: 10
+        humanization: 10
+        faq_depth: 10
+        point_of_view: 9
+        factual_honesty: 10
+      issues: []
