@@ -1,4 +1,17 @@
 document.addEventListener('DOMContentLoaded', function () {
+  // Auto-detect the site's base path (e.g. "/zeenan-portfolio") so asset
+  // paths work correctly whether the site is hosted at the domain root or
+  // in a subfolder like GitHub Project Pages.
+  var BASE_PATH = (function () {
+    var linkEl = document.querySelector('link[href*="/assets/css/main.css"]');
+    if (linkEl) {
+      var href = linkEl.getAttribute('href');
+      var idx = href.indexOf('/assets/css/main.css');
+      if (idx > -1) return href.substring(0, idx);
+    }
+    return '';
+  })();
+
   var toggle = document.querySelector('.nav-toggle');
   var links = document.querySelector('.nav-links');
   if (toggle && links) {
@@ -132,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var soundEnabled = localStorage.getItem('zeenan_sound') !== 'off';
   var sounds = {};
   ['click', 'hover', 'notify'].forEach(function (name) {
-    var audio = new Audio('/assets/sounds/' + name + '.mp3');
+    var audio = new Audio(BASE_PATH + '/assets/sounds/' + name + '.mp3');
     audio.volume = name === 'hover' ? 0.15 : 0.35;
     audio.preload = 'auto';
     sounds[name] = audio;
