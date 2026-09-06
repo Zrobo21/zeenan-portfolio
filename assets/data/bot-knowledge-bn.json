@@ -1,0 +1,63 @@
+{
+  "_readme": "Bangla knowledge base. Same structure and keys as bot-knowledge.json — keywords should be common Bangla/Banglish phrases a visitor might actually type.",
+
+  "capabilities": {
+    "keywords": ["আর কি", "কি সাহায্য করতে পারো", "কিভাবে সাহায্য", "tumi ki korte paro", "ki help korte paro"],
+    "answer": "আমি Zeenan-এর services, certifications, pricing, এবং appointment বুক করার নিয়ম জানাতে পারি। চাইলে সরাসরি appointment form, contact section, projects বা blog-এ নিয়ে যেতে পারি।"
+  },
+  "identity": {
+    "keywords": ["তুমি কে", "কে বানিয়েছে", "zeenan কে", "ke tumi", "zeenan ke"],
+    "answer": "আমি Zeenan-এর assistant! Haa Meem Ul Karim Zeenan (Zeenan নামে পরিচিত) একজন Digital Marketing Expert & Consultant, NSDA Level 3 সার্টিফাইড, ইউরোপ, আমেরিকা ও এশিয়া জুড়ে ক্লায়েন্টদের সাথে কাজ করেন।"
+  },
+  "services": {
+    "keywords": ["সার্ভিস", "কি কি করেন", "কি সেবা দেন", "service ki", "ki ki kore"],
+    "answer": "Zeenan SEO, content strategy, keyword research, এবং social media marketing সেবা দিয়ে থাকেন।",
+    "navigate": { "targetId": "services", "label": "সার্ভিস সেকশন" }
+  },
+  "why_choose": {
+    "keywords": ["কেন নিব", "কেন choose", "কেন hire", "keno nibo", "keno zeenan"],
+    "answer": "Zeenan practical, data-backed strategy-তে focus করেন — real keyword research এবং SEO fundamentals, generic advice না। NSDA Level 3 সার্টিফাইড এবং international ক্লায়েন্টদের সাথে কাজের অভিজ্ঞতা আছে।",
+    "navigate": { "targetId": "services", "label": "সার্ভিস সেকশন" }
+  },
+  "certifications": {
+    "keywords": ["সার্টিফিকেট", "certification", "nsda", "qualification ki"],
+    "answer": "Zeenan-এর NSDA Level 3 সার্টিফিকেট আছে Digital Marketing for Freelancing-এ, এবং Creative IT Institute থেকে Professional Digital Marketing সার্টিফিকেট (Grade A+)।",
+    "navigate": { "targetId": "certifications", "label": "সার্টিফিকেশন সেকশন" }
+  },
+  "location": {
+    "keywords": ["কোথায় থাকেন", "কোন দেশ", "location", "kothay thake"],
+    "answer": "Zeenan বাংলাদেশে থাকেন এবং ইউরোপ, আমেরিকা, এশিয়ার ক্লায়েন্টদের সাথে remote-এ কাজ করেন।"
+  },
+  "contact": {
+    "keywords": ["যোগাযোগ", "contact korbo", "email", "whatsapp", "kivabe jogajog"],
+    "answer": "তুমি email, WhatsApp, অথবা এই সাইটের appointment form দিয়ে Zeenan-এর সাথে যোগাযোগ করতে পারো।",
+    "navigate": { "targetId": "contact", "label": "কন্টাক্ট সেকশন" }
+  },
+  "appointment": {
+    "keywords": ["বুক করব", "appointment", "meeting", "consultation", "book korbo"],
+    "answer": "তুমি এই সাইট থেকেই appointment-এর জন্য apply করতে পারো — নাম, WhatsApp নম্বর, ইমেইল, purpose আর goal দিলেই হবে। Zeenan ১-২ কর্মদিবসের মধ্যে reply দেবেন।",
+    "navigate": { "targetId": "appointment", "label": "অ্যাপয়েন্টমেন্ট ফর্ম" }
+  },
+  "pricing": {
+    "keywords": ["দাম", "কত টাকা", "price koto", "koto kharoch", "budget"],
+    "answer": "কাজের পরিধির উপর দাম নির্ভর করে — প্রতিটা প্রজেক্ট আলাদা। সঠিক quote পাওয়ার সবচেয়ে ভালো উপায় হলো appointment form দিয়ে একটা consultation বুক করা।",
+    "navigate": { "targetId": "appointment", "label": "অ্যাপয়েন্টমেন্ট ফর্ম" }
+  },
+  "seo_general": {
+    "keywords": ["seo কি", "seo মানে কি", "what is seo bangla"],
+    "answer": "SEO (Search Engine Optimization) মানে একটা ওয়েবসাইটকে এমনভাবে উন্নত করা যাতে সেটা Google search-এ বেশি মানুষের কাছে দেখা যায়। এই সাইটের ব্লগে SEO নিয়ে বিস্তারিত গাইড আছে।",
+    "navigate": { "url": "/blog/", "label": "ব্লগ" }
+  },
+  "worldwide": {
+    "keywords": ["বাংলাদেশের বাইরে", "international client", "global", "bidesh"],
+    "answer": "হ্যাঁ, Zeenan ইউরোপ, আমেরিকা, এশিয়া জুড়ে ক্লায়েন্টদের সাথে কাজ করেন — শুধু বাংলাদেশ না। পুরো কাজ remote-এ হয়।"
+  },
+  "greeting": {
+    "keywords": ["হ্যালো", "আসসালামু আলাইকুম", "hi", "hello bangla"],
+    "answer": "হ্যালো! 👋 আমি Zeenan-এর assistant। Services, pricing, certifications নিয়ে জিজ্ঞেস করতে পারো, অথবা 'book' লিখলে consultation বুক করতে সাহায্য করব।"
+  },
+  "thanks": {
+    "keywords": ["ধন্যবাদ", "thanks bangla", "onek shohayota"],
+    "answer": "তোমাকেও ধন্যবাদ! আরও কিছু জানার থাকলে নির্দ্বিধায় জিজ্ঞেস করো। 🙌"
+  }
+}

@@ -37,7 +37,13 @@
     repeating-linear-gradient(135deg, #ece7d8 0px, #ece7d8 2px, #f4f1e8 2px, #f4f1e8 40px);
 }
 
-[data-theme="day"] .nav-logo span { color: #2f5210; font-weight: 700; }
+[data-theme="day"] .nav-logo span {
+  color: #ffffff;
+  background: #2f5210;
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-weight: 700;
+}
 [data-theme="day"] .cert-image { background: #f4f1e8; }
 
 [data-theme="day"] .hero-portrait-wrap::before {
@@ -795,6 +801,26 @@ section { padding: 56px 0; border-bottom: 1px solid var(--line); }
   border-color: var(--green);
 }
 .form-group textarea { resize: vertical; min-height: 90px; }
+
+.phone-input-row {
+  display: flex;
+  gap: 8px;
+}
+.country-code-select {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 12px 8px;
+  border-radius: 2px;
+  max-width: 130px;
+  flex-shrink: 0;
+}
+.country-code-select:focus { outline: none; border-color: var(--green); }
+@media (max-width: 420px) {
+  .country-code-select { max-width: 100px; font-size: 13px; }
+}
 .form-submit-row { display: flex; align-items: center; gap: 16px; margin-top: 8px; }
 .form-status {
   font-family: var(--font-mono);

@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
     phone: "entry.814744908",
     email: "entry.1306844477",
     purpose: "entry.2097373632",
+    link: "entry.13948145",
     goal: "entry.2144171615"
   };
 
@@ -83,11 +84,14 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
+      var countryCode = document.getElementById('apt-country-code').value;
+      var phoneNumber = document.getElementById('apt-phone').value.trim();
       var formData = {
         name: document.getElementById('apt-name').value,
-        phone: document.getElementById('apt-phone').value,
+        phone: countryCode + ' ' + phoneNumber,
         email: document.getElementById('apt-email').value,
         purpose: document.getElementById('apt-purpose').value,
+        link: document.getElementById('apt-link').value,
         goal: document.getElementById('apt-goal').value
       };
 
@@ -150,7 +154,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!avatarBtn || !chatWindow) return; // widget not on this page
 
     var KNOWLEDGE_URL = BASE_PATH + '/assets/data/bot-knowledge.json';
+    var KNOWLEDGE_URL_BN = BASE_PATH + '/assets/data/bot-knowledge-bn.json';
     var knowledge = null;
+    var knowledgeBn = null;
     var hasGreeted = false;
     var closingMessages = [
       "Don't hesitate to reach out if anything else comes up — I'm here for you! 🙌",
@@ -175,6 +181,9 @@ document.addEventListener('DOMContentLoaded', function () {
       if (introBubble) introBubble.classList.remove('show');
       if (!hasGreeted) {
         addBotMessage("Hey! I'm Zeenan's assistant. Ask me about services, certifications, pricing, or how to book a consultation — or I can take you straight to a section of the site.");
+        setTimeout(function () {
+          addBotMessage("💬 Feel comfortable typing in your own language — we respect every language, and I'll do my best to reply in it too.");
+        }, 900);
         hasGreeted = true;
       }
       chatInput.focus();
@@ -198,8 +207,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function clampPosition(right, bottom) {
       var margin = 8;
-      var maxRight = window.innerWidth - widget.offsetWidth - margin;
-      var maxBottom = window.innerHeight - widget.offsetHeight - margin;
+      // Use the avatar button's own width/height, not the wrapping .bot-widget
+      // container's — the container can be wider than the button because it
+      // also holds the intro bubble/chat window as flex children, which
+      // would otherwise let offsetWidth report a much bigger number than
+      // the visible circular button and throw off the drag boundaries.
+      var refWidth = avatarBtn.offsetWidth;
+      var refHeight = widget.offsetHeight; // height is fine since avatar sits at the bottom
+      var maxRight = window.innerWidth - refWidth - margin;
+      var maxBottom = window.innerHeight - refHeight - margin;
       return {
         right: Math.min(Math.max(right, margin), Math.max(maxRight, margin)),
         bottom: Math.min(Math.max(bottom, margin), Math.max(maxBottom, margin))
@@ -211,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function () {
       dragMoved = false;
       startX = clientX;
       startY = clientY;
-      var rect = widget.getBoundingClientRect();
+      var rect = avatarBtn.getBoundingClientRect();
       startRight = window.innerWidth - rect.right;
       startBottom = window.innerHeight - rect.bottom;
     }
@@ -248,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Keep the widget on-screen if the window is resized/rotated.
     window.addEventListener('resize', function () {
-      var rect = widget.getBoundingClientRect();
+      var rect = avatarBtn.getBoundingClientRect();
       var currentRight = window.innerWidth - rect.right;
       var currentBottom = window.innerHeight - rect.bottom;
       var next = clampPosition(currentRight, currentBottom);
@@ -290,15 +306,77 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function loadKnowledgeBn(callback) {
+      if (knowledgeBn) { callback(knowledgeBn); return; }
+      fetch(KNOWLEDGE_URL_BN)
+        .then(function (res) { return res.json(); })
+        .then(function (data) { knowledgeBn = data; callback(data); })
+        .catch(function () { callback(null); });
+    }
+
+    /* ---------- LANGUAGE DETECTION + FREE TRANSLATION ---------- */
+    // Bangla is checked by Unicode script range, not word lists, since
+    // Bangla script is unambiguous. English is assumed as the default/base
+    // language for the main knowledge base and doesn't need detecting.
+    function containsBanglaScript(text) {
+      return /[\u0980-\u09FF]/.test(text);
+    }
+
+    // A visitor is treated as "using another language" when their message
+    // has no Bangla script AND doesn't look like English (a rough check:
+    // mostly non-ASCII letters, or matches common non-English Unicode
+    // ranges for Chinese/Russian/Arabic/etc). This is a heuristic, not
+    // perfect language ID — good enough to decide whether to attempt
+    // translation at all.
+    function looksNonEnglishNonBangla(text) {
+      if (containsBanglaScript(text)) return false;
+      var nonAsciiLetters = (text.match(/[^\x00-\x7F]/g) || []).length;
+      var totalLetters = (text.match(/[a-zA-Z\u0080-\uFFFF]/g) || []).length;
+      if (totalLetters === 0) return false;
+      return (nonAsciiLetters / totalLetters) > 0.3;
+    }
+
+    // Uses Google's public (unofficial, key-free) translate endpoint. This
+    // is not Google's documented Cloud Translation API -- it's the same
+    // free endpoint translate.google.com's own webpage uses, called
+    // directly. No key, no cost, but also no uptime guarantee, so every
+    // call has a fallback that just shows the original text if it fails.
+    function freeTranslate(text, targetLang, sourceLang) {
+      sourceLang = sourceLang || 'auto';
+      var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' +
+        sourceLang + '&tl=' + targetLang + '&dt=t&q=' + encodeURIComponent(text);
+      return fetch(url)
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          // Response shape: [[["translated text","original text",null,null,...], ...], ...]
+          if (data && data[0]) {
+            return data[0].map(function (chunk) { return chunk[0]; }).join('');
+          }
+          return null;
+        })
+        .catch(function () { return null; });
+    }
+
+    function detectLanguageCode(text) {
+      var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=' + encodeURIComponent(text);
+      return fetch(url)
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          // Detected source language code is at data[2] in this endpoint's response.
+          return (data && data[2]) ? data[2] : null;
+        })
+        .catch(function () { return null; });
+    }
+
     // Section-navigation shortcuts recognized directly, before falling back
     // to the knowledge base — lets the bot actually scroll the visitor there.
     var NAV_SHORTCUTS = [
-      { keywords: ['book', 'appointment', 'schedule', 'consultation form'], targetId: 'appointment', label: 'the appointment form' },
-      { keywords: ['contact', 'email you', 'reach you'], targetId: 'contact', label: 'the contact section' },
-      { keywords: ['service', 'what do you offer'], targetId: 'services', label: 'the services section' },
-      { keywords: ['certificat', 'credential', 'nsda'], targetId: 'certifications', label: 'the certifications section' },
-      { keywords: ['project', 'keyword sample', 'case stud'], targetId: 'projects', label: 'the projects section' },
-      { keywords: ['blog', 'article', 'read more'], targetId: null, label: 'the blog', url: '/blog/' }
+      { keywords: ['book', 'appointment', 'schedule', 'consultation form', 'apply now', 'apply for'], targetId: 'appointment', label: 'the appointment form' },
+      { keywords: ['contact', 'email you', 'reach you', 'phone number', 'whatsapp number'], targetId: 'contact', label: 'the contact section' },
+      { keywords: ['service', 'what do you offer', 'what can zeenan do', 'take service', 'get service', 'hire zeenan', 'why should i', 'why choose', 'why hire'], targetId: 'services', label: 'the services section' },
+      { keywords: ['certificat', 'credential', 'nsda', 'qualification'], targetId: 'certifications', label: 'the certifications section' },
+      { keywords: ['project', 'keyword sample', 'case stud', 'past work', 'sample work'], targetId: 'projects', label: 'the projects section' },
+      { keywords: ['blog', 'article', 'read more', 'learn seo'], targetId: null, label: 'the blog', url: '/blog/' }
     ];
 
     function tryNavigate(question) {
@@ -350,7 +428,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (score > bestScore) {
           bestScore = score;
-          bestMatch = entry.answer;
+          bestMatch = { answer: entry.answer, navigate: entry.navigate || null };
         }
       });
 
@@ -358,26 +436,6 @@ document.addEventListener('DOMContentLoaded', function () {
       // accidentally latch onto a weakly-related entry.
       return bestScore >= 4 ? bestMatch : null;
     }
-
-    function handleUserQuestion(question) {
-      addUserMessage(question);
-
-      var navMatch = tryNavigate(question);
-      if (navMatch) {
-        setTimeout(function () {
-          addBotMessage("On it — taking you to " + navMatch.label + " now!");
-          setTimeout(function () {
-            if (navMatch.url) {
-              window.location.href = BASE_PATH + navMatch.url;
-            } else {
-              closeChat();
-              var target = document.getElementById(navMatch.targetId);
-              if (target) target.scrollIntoView({ behavior: 'smooth' });
-            }
-          }, 700);
-        }, 400);
-        return;
-      }
 
     // Words that suggest a question is even loosely about this site's
     // domain (marketing, the business, or Zeenan). If a question matches
@@ -395,31 +453,129 @@ document.addEventListener('DOMContentLoaded', function () {
       return !RELEVANCE_HINTS.some(function (hint) { return q.indexOf(hint) !== -1; });
     }
 
-    loadKnowledge(function (data) {
+    function handleUserQuestion(rawQuestion) {
+      addUserMessage(rawQuestion);
+
+      if (containsBanglaScript(rawQuestion)) {
+        // Bangla script detected — use the dedicated Bangla knowledge base
+        // directly, no translation needed.
+        loadKnowledgeBn(function (bnData) {
+          setTimeout(function () {
+            var match = bnData ? findAnswer(rawQuestion, bnData) : null;
+            if (match) {
+              respondWithMatch(match, null); // null = no translation, native Bangla answer
+            } else {
+              addBotMessage("দুঃখিত, এই প্রশ্নের নির্দিষ্ট উত্তর আমার কাছে নেই — Services, pricing, certifications, অথবা appointment নিয়ে জিজ্ঞেস করতে পারো।");
+            }
+          }, 500);
+        });
+        return;
+      }
+
+      if (looksNonEnglishNonBangla(rawQuestion)) {
+        // Likely a different language entirely. Translate the question to
+        // English, find the answer in the English knowledge base, then
+        // translate just that answer back for display. The knowledge base
+        // itself is never modified — only what's shown to this visitor.
+        detectLanguageCode(rawQuestion).then(function (langCode) {
+          freeTranslate(rawQuestion, 'en', 'auto').then(function (translatedQuestion) {
+            if (!translatedQuestion) {
+              // Translation service unreachable — fall back to English flow
+              // as a best effort rather than leaving the visitor stuck.
+              loadKnowledge(function (data) {
+                var match = data ? findAnswer(rawQuestion, data) : null;
+                setTimeout(function () { respondWithMatch(match, null, rawQuestion); }, 500);
+              });
+              return;
+            }
+            loadKnowledge(function (data) {
+              var match = data ? findAnswer(translatedQuestion, data) : null;
+              setTimeout(function () {
+                respondWithMatch(match, langCode || null, translatedQuestion);
+              }, 500);
+            });
+          });
+        });
+        return;
+      }
+
+      // Default: English flow.
+      loadKnowledge(function (data) {
         if (!data) {
           setTimeout(function () {
             addBotMessage("I'm having trouble reaching my knowledge base right now — try the contact section to reach Zeenan directly!");
           }, 400);
           return;
         }
-        var answer = findAnswer(question, data);
-        setTimeout(function () {
-          if (answer) {
-            addBotMessage(answer);
-          } else if (isLikelyOffTopic(question)) {
-            addBotMessage("Sorry, that's outside what I can help with — I'm here for questions about Zeenan's services, pricing, certifications, or booking a consultation. Anything along those lines I can help with?");
-          } else {
-            addBotMessage("I don't have a specific answer for that yet — try asking about services, pricing, certifications, or how to book a consultation. Or I can take you straight to the contact section if you'd like to ask Zeenan directly!");
-          }
-          // Occasionally close out with a warm sign-off after a real answer.
-          if (answer && Math.random() < 0.3) {
+        var match = findAnswer(rawQuestion, data);
+        setTimeout(function () { respondWithMatch(match, null, rawQuestion); }, 500);
+      });
+    }
+
+    // Shared responder: takes a {answer, navigate} match (or null), the
+    // English-form question (for nav-shortcut fallback matching), and an
+    // optional target language code to translate the OUTPUT into before
+    // displaying. English/Bangla-native answers pass null (no translation).
+    function respondWithMatch(match, translateToLang, englishQuestion) {
+      function showText(text, isNav) {
+        if (!translateToLang || translateToLang === 'en') {
+          addBotMessage(text);
+          return Promise.resolve();
+        }
+        return freeTranslate(text, translateToLang, 'en').then(function (translated) {
+          addBotMessage(translated || text); // fall back to English if translation fails
+        });
+      }
+
+      if (match) {
+        showText(match.answer).then(function () {
+          if (match.navigate) {
+            setTimeout(function () {
+              var nav = match.navigate;
+              var followUp = "Want to see more? Taking you to " + nav.label + " now.";
+              showText(followUp).then(function () {
+                setTimeout(function () {
+                  if (nav.url) {
+                    window.location.href = BASE_PATH + nav.url;
+                  } else {
+                    closeChat();
+                    var target = document.getElementById(nav.targetId);
+                    if (target) target.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }, 900);
+              });
+            }, 1100);
+          } else if (Math.random() < 0.3) {
             setTimeout(function () {
               var closing = closingMessages[Math.floor(Math.random() * closingMessages.length)];
-              addBotMessage(closing);
+              showText(closing);
             }, 1600);
           }
-        }, 500);
-      });
+        });
+      } else {
+        var navMatch = tryNavigate(englishQuestion || '');
+        var fallback;
+        if (navMatch) {
+          fallback = "On it — taking you to " + navMatch.label + " now!";
+          showText(fallback).then(function () {
+            setTimeout(function () {
+              if (navMatch.url) {
+                window.location.href = BASE_PATH + navMatch.url;
+              } else {
+                closeChat();
+                var target = document.getElementById(navMatch.targetId);
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+              }
+            }, 700);
+          });
+        } else if (isLikelyOffTopic(englishQuestion || '')) {
+          fallback = "Sorry, that's outside what I can help with — I'm here for questions about Zeenan's services, pricing, certifications, or booking a consultation. Anything along those lines I can help with?";
+          showText(fallback);
+        } else {
+          fallback = "I don't have a specific answer for that yet — try asking about services, pricing, certifications, or how to book a consultation. Or I can take you straight to the contact section if you'd like to ask Zeenan directly!";
+          showText(fallback);
+        }
+      }
     }
 
     function submitQuestion() {

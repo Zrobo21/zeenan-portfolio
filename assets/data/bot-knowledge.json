@@ -1,5 +1,5 @@
 {
-  "_readme": "This is the knowledge base for the site's chat assistant. Add or edit entries here — each has keywords to match against a visitor's question, and an answer the bot will give. No sensitive personal data belongs here.",
+  "_readme": "This is the knowledge base for the site's chat assistant. Add or edit entries here — each has keywords to match, an answer, and an optional 'navigate' object ({targetId, label} for a same-page scroll, or {url, label} for a different page like the blog) that fires as a helpful follow-up after the answer. No sensitive personal data belongs here.",
 
   "capabilities": {
     "keywords": ["what else", "what can you help", "how can you help", "what do you do", "help me with what", "your capabilities", "what can you answer", "what should i ask", "what can i ask"],
@@ -11,27 +11,38 @@
   },
   "services": {
     "keywords": ["service", "what do you offer", "what can zeenan do", "help with marketing", "what does zeenan do", "what kind of work", "specialize", "expertise", "what fields"],
-    "answer": "Zeenan offers SEO (search engine optimization), content strategy & writing, keyword research, and social media marketing. Want to book a consultation? Just ask me to take you to the appointment form."
+    "answer": "Zeenan offers SEO (search engine optimization), content strategy & writing, keyword research, and social media marketing.",
+    "navigate": { "targetId": "services", "label": "the services section" }
   },
   "seo_service": {
     "keywords": ["seo service", "do seo", "seo help", "improve my ranking", "rank higher", "seo work"],
-    "answer": "Yes — SEO is one of Zeenan's core services, covering on-page optimization, technical fixes, and content structure to help a site actually rank for what people search. Want to book a consultation to talk specifics?"
+    "answer": "Yes — SEO is one of Zeenan's core services, covering on-page optimization, technical fixes, and content structure to help a site actually rank for what people search.",
+    "navigate": { "targetId": "services", "label": "the services section" }
   },
   "content_strategy": {
     "keywords": ["content strategy", "content writing", "blog writing service", "write content for me", "content marketing service"],
-    "answer": "Content strategy and writing is one of Zeenan's core services — building content that targets real search intent instead of generic filler. Want to see the Projects section for a sample of the process?"
+    "answer": "Content strategy and writing is one of Zeenan's core services — building content that targets real search intent instead of generic filler.",
+    "navigate": { "targetId": "services", "label": "the services section" }
   },
   "social_media_service": {
     "keywords": ["social media service", "manage my page", "facebook marketing", "instagram marketing", "social media help"],
-    "answer": "Social media marketing is part of Zeenan's services — strategy and content tailored to the platform your customers actually use. Want to book a consultation to discuss your specific needs?"
+    "answer": "Social media marketing is part of Zeenan's services — strategy and content tailored to the platform your customers actually use.",
+    "navigate": { "targetId": "services", "label": "the services section" }
+  },
+  "why_choose": {
+    "keywords": ["why should i choose", "why hire zeenan", "what makes you different", "why zeenan", "why should i take service", "why should i take", "why should i get", "should i choose", "why use zeenan"],
+    "answer": "Zeenan focuses on practical, data-backed strategy — real keyword research and SEO fundamentals — over generic advice or vanity metrics. NSDA Level 3 certified with a track record across international clients.",
+    "navigate": { "targetId": "services", "label": "the services section, so you can see exactly what's offered" }
   },
   "certifications": {
     "keywords": ["certified", "certification", "qualification", "nsda", "credential", "degree", "trained", "qualified", "diploma"],
-    "answer": "Zeenan holds an NSDA (National Skills Development Authority, Bangladesh Government) Level 3 certification in Digital Marketing for Freelancing, plus a Professional Digital Marketing certificate (Grade A+) from Creative IT Institute. Check the Certifications section for the full details."
+    "answer": "Zeenan holds an NSDA (National Skills Development Authority, Bangladesh Government) Level 3 certification in Digital Marketing for Freelancing, plus a Professional Digital Marketing certificate (Grade A+) from Creative IT Institute.",
+    "navigate": { "targetId": "certifications", "label": "the certifications section" }
   },
   "experience": {
     "keywords": ["experience", "how long has zeenan", "years of experience", "background", "how experienced"],
-    "answer": "Zeenan is NSDA Level 3 certified in Digital Marketing and holds a Professional Digital Marketing certificate (Grade A+) from Creative IT Institute, with hands-on project experience across SEO, content, and social media. Check the Certifications and Projects sections for details."
+    "answer": "Zeenan is NSDA Level 3 certified in Digital Marketing and holds a Professional Digital Marketing certificate (Grade A+) from Creative IT Institute, with hands-on project experience across SEO, content, and social media.",
+    "navigate": { "targetId": "projects", "label": "the projects section" }
   },
   "location": {
     "keywords": ["where are you based", "location", "which country", "based in", "where is zeenan", "where do you work", "which city"],
@@ -39,27 +50,33 @@
   },
   "contact": {
     "keywords": ["contact", "email address", "reach you", "phone number", "whatsapp number", "get in touch", "talk to zeenan", "message zeenan"],
-    "answer": "You can reach Zeenan by email at haameemulkarim.zeenan.dm@gmail.com, on WhatsApp, or through the appointment form on this site. Want me to take you to the contact section?"
+    "answer": "You can reach Zeenan by email, on WhatsApp, or through the appointment form on this site.",
+    "navigate": { "targetId": "contact", "label": "the contact section" }
   },
   "appointment": {
     "keywords": ["book", "appointment", "consultation", "meeting", "schedule a call", "hire zeenan", "work together", "start a project", "apply", "get started"],
-    "answer": "You can apply for an appointment right on this site — want me to scroll you there? Just fill in your name, WhatsApp number, email, purpose, and goal, and Zeenan will get back to you within 1-2 business days."
+    "answer": "You can apply for an appointment right on this site — just fill in your name, WhatsApp number, email, purpose, and goal, and Zeenan will get back to you within 1-2 business days.",
+    "navigate": { "targetId": "appointment", "label": "the appointment form" }
   },
   "pricing": {
     "keywords": ["price", "pricing", "cost", "how much", "rate", "charge", "fee", "budget", "expensive", "cheap", "affordable", "payment"],
-    "answer": "Pricing depends on the scope of work — every project is a little different. The best way to get an accurate quote is to book a quick consultation through the appointment form so Zeenan can understand what you need."
+    "answer": "Pricing depends on the scope of work — every project is a little different. The best way to get an accurate quote is to book a quick consultation so Zeenan can understand what you need.",
+    "navigate": { "targetId": "appointment", "label": "the appointment form" }
   },
   "seo_general": {
     "keywords": ["what is seo", "seo mean", "search engine optimization", "explain seo", "seo basics", "how does seo work"],
-    "answer": "SEO (Search Engine Optimization) is the practice of improving a website so it ranks higher in search results and gets found by the right people. There's a whole blog on this site with practical SEO guides if you want to dig deeper — want me to take you there?"
+    "answer": "SEO (Search Engine Optimization) is the practice of improving a website so it ranks higher in search results and gets found by the right people. There's a whole blog on this site with practical SEO guides if you want to dig deeper.",
+    "navigate": { "url": "/blog/", "label": "the blog" }
   },
   "keyword_research": {
     "keywords": ["keyword research", "keywords", "find keywords", "keyword strategy", "what is keyword research"],
-    "answer": "Keyword research means figuring out exactly what your potential customers type into Google, so your content targets real search demand instead of guesswork. Check the Projects section for a sample of what this looks like in practice."
+    "answer": "Keyword research means figuring out exactly what your potential customers type into Google, so your content targets real search demand instead of guesswork.",
+    "navigate": { "targetId": "projects", "label": "the projects section for a real sample" }
   },
   "blog": {
     "keywords": ["blog", "articles", "read more", "learn seo", "posts", "guides", "tutorials"],
-    "answer": "There's a full blog on this site covering SEO, keyword research, and digital marketing tips — great if you want to learn the fundamentals yourself. Want me to take you there?"
+    "answer": "There's a full blog on this site covering SEO, keyword research, and digital marketing tips — great if you want to learn the fundamentals yourself.",
+    "navigate": { "url": "/blog/", "label": "the blog" }
   },
   "worldwide": {
     "keywords": ["worldwide", "international", "other countries", "outside bangladesh", "global clients", "remote work", "abroad", "overseas"],
@@ -79,19 +96,18 @@
   },
   "portfolio_projects": {
     "keywords": ["project", "case stud", "sample work", "past work", "examples", "portfolio", "clients worked with"],
-    "answer": "Client work stays confidential — Zeenan respects that fully. But there's a sample keyword research breakdown in the Projects section that shows the kind of process used before any content gets written. Want me to take you there?"
+    "answer": "Client work stays confidential — Zeenan respects that fully. But there's a sample keyword research breakdown that shows the kind of process used before any content gets written.",
+    "navigate": { "targetId": "projects", "label": "the projects section" }
   },
   "small_business": {
     "keywords": ["small business", "local shop", "small shop", "startup help", "new business"],
-    "answer": "Zeenan works with businesses of all sizes, including small and local shops — practical, budget-aware marketing rather than one-size-fits-all corporate strategy. Want to book a consultation to talk through your specific situation?"
+    "answer": "Zeenan works with businesses of all sizes, including small and local shops — practical, budget-aware marketing rather than one-size-fits-all corporate strategy.",
+    "navigate": { "targetId": "appointment", "label": "the appointment form" }
   },
   "ecommerce": {
     "keywords": ["ecommerce", "online store", "online shop", "shopify", "woocommerce"],
-    "answer": "Yes, ecommerce SEO and content strategy fall within Zeenan's services — helping online stores get found by people actually ready to buy. Want to book a consultation?"
-  },
-  "why_choose": {
-    "keywords": ["why should i choose", "why hire zeenan", "what makes you different", "why zeenan"],
-    "answer": "Zeenan focuses on practical, data-backed strategy — real keyword research and SEO fundamentals — over generic advice or vanity metrics. NSDA Level 3 certified with a track record across international clients."
+    "answer": "Yes, ecommerce SEO and content strategy fall within Zeenan's services — helping online stores get found by people actually ready to buy.",
+    "navigate": { "targetId": "services", "label": "the services section" }
   },
   "languages": {
     "keywords": ["what language", "speak english", "speak bangla", "communication language"],
@@ -99,6 +115,7 @@
   },
   "process": {
     "keywords": ["how does it work", "what is the process", "how do we start", "next steps", "how to begin"],
-    "answer": "It starts with a quick consultation — book through the appointment form, and Zeenan will follow up to understand your goals before proposing a plan. Want me to take you to the form?"
+    "answer": "It starts with a quick consultation — book through the appointment form, and Zeenan will follow up to understand your goals before proposing a plan.",
+    "navigate": { "targetId": "appointment", "label": "the appointment form" }
   }
 }
