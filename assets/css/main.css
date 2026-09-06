@@ -202,6 +202,9 @@ a:hover { text-decoration: underline; }
   font-size: 22px;
   letter-spacing: 1px;
   color: var(--ink);
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
 }
 .nav-logo span { color: var(--green); }
 .nav-links {

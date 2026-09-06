@@ -296,6 +296,32 @@ document.addEventListener('DOMContentLoaded', function () {
     function addBotMessage(text) { addMessage(text, 'bot'); playSound('notify'); }
     function addUserMessage(text) { addMessage(text, 'user'); }
 
+    // Shows navigation as a clickable link inside the chat instead of
+    // forcing an auto-scroll/auto-close. This keeps the conversation intact
+    // (especially important mid-translation) and lets the visitor decide
+    // when they're ready to move — fixes the jarring "chat suddenly closes
+    // and yanks you to another section" behavior.
+    function addNavPrompt(nav) {
+      var msg = document.createElement('div');
+      msg.className = 'bot-msg bot-msg-bot';
+      var link = document.createElement('span');
+      link.className = 'bot-msg-link';
+      link.textContent = '→ Take me to ' + nav.label;
+      link.addEventListener('click', function () {
+        if (nav.url) {
+          window.location.href = BASE_PATH + nav.url;
+        } else {
+          closeChat();
+          var target = document.getElementById(nav.targetId);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+      msg.appendChild(link);
+      chatMessages.appendChild(msg);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      playSound('notify');
+    }
+
     function loadKnowledge(callback) {
       if (knowledge) { callback(knowledge); return; }
       fetch(KNOWLEDGE_URL)
@@ -532,19 +558,8 @@ document.addEventListener('DOMContentLoaded', function () {
           if (match.navigate) {
             setTimeout(function () {
               var nav = match.navigate;
-              var followUp = "Want to see more? Taking you to " + nav.label + " now.";
-              showText(followUp).then(function () {
-                setTimeout(function () {
-                  if (nav.url) {
-                    window.location.href = BASE_PATH + nav.url;
-                  } else {
-                    closeChat();
-                    var target = document.getElementById(nav.targetId);
-                    if (target) target.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }, 900);
-              });
-            }, 1100);
+              addNavPrompt(nav);
+            }, 900);
           } else if (Math.random() < 0.3) {
             setTimeout(function () {
               var closing = closingMessages[Math.floor(Math.random() * closingMessages.length)];
@@ -556,18 +571,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var navMatch = tryNavigate(englishQuestion || '');
         var fallback;
         if (navMatch) {
-          fallback = "On it — taking you to " + navMatch.label + " now!";
-          showText(fallback).then(function () {
-            setTimeout(function () {
-              if (navMatch.url) {
-                window.location.href = BASE_PATH + navMatch.url;
-              } else {
-                closeChat();
-                var target = document.getElementById(navMatch.targetId);
-                if (target) target.scrollIntoView({ behavior: 'smooth' });
-              }
-            }, 700);
-          });
+          setTimeout(function () { addNavPrompt(navMatch); }, 300);
         } else if (isLikelyOffTopic(englishQuestion || '')) {
           fallback = "Sorry, that's outside what I can help with — I'm here for questions about Zeenan's services, pricing, certifications, or booking a consultation. Anything along those lines I can help with?";
           showText(fallback);
