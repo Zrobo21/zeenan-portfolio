@@ -37,12 +37,64 @@
     repeating-linear-gradient(135deg, #ece7d8 0px, #ece7d8 2px, #f4f1e8 2px, #f4f1e8 40px);
 }
 
+/* Explicit contrast overrides for every hero text element in day mode.
+   The hero previously relied on --ink/--gold variables alone, but stacked
+   gradients + the portrait image made real-world contrast inconsistent —
+   this pins down exact, tested colors instead of trusting the blend. */
+[data-theme="day"] .hero-tag,
+[data-theme="day"] .stat-num {
+  color: #8a5a00; /* darker gold, readable on cream background */
+}
+[data-theme="day"] .hero h1 {
+  color: #1a1a16;
+}
+[data-theme="day"] .hero h1 .accent {
+  color: #3d5f18;
+}
+[data-theme="day"] .hero-sub {
+  color: #4a4840;
+}
+[data-theme="day"] .stat-label {
+  color: #5a5850;
+}
+[data-theme="day"] .stat-bar {
+  border-top-color: #ddd8c8;
+}
+[data-theme="day"] .btn-outline {
+  border-color: #1a1a16;
+  color: #1a1a16;
+}
+[data-theme="day"] .btn-outline:hover {
+  border-color: #3d5f18;
+  color: #3d5f18;
+}
+
 [data-theme="day"] .nav-logo span {
   color: #ffffff;
   background: #2f5210;
   padding: 2px 6px;
   border-radius: 2px;
   font-weight: 700;
+}
+/* Nav icon buttons (hamburger, theme toggle, sound toggle) need their own
+   explicit day-mode styling — the shared --line/--ink-dim variables are too
+   low-contrast for small icon-only buttons against the light background. */
+[data-theme="day"] .nav-toggle,
+[data-theme="day"] .theme-toggle,
+[data-theme="day"] .sound-toggle {
+  border-color: #8a8578;
+  color: #1a1a16;
+  background: #ffffff;
+}
+[data-theme="day"] .theme-toggle:hover,
+[data-theme="day"] .sound-toggle:hover {
+  border-color: #3d5f18;
+  color: #3d5f18;
+  background: #f4f1e8;
+}
+[data-theme="day"] .sound-toggle.muted {
+  opacity: 0.7;
+  color: #5a5850;
 }
 [data-theme="day"] .cert-image { background: #f4f1e8; }
 

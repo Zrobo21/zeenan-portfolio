@@ -362,36 +362,67 @@ document.addEventListener('DOMContentLoaded', function () {
       return (nonAsciiLetters / totalLetters) > 0.3;
     }
 
+    // Last-resort fallback if the translate endpoint's detected-language
+    // field can't be parsed for some reason: guess a language family from
+    // the Unicode script actually used, purely so the reply can still be
+    // translated into *something* reasonable rather than staying in English.
+    function guessLangFromScript(text) {
+      if (/[\u4E00-\u9FFF]/.test(text)) return 'zh-CN';   // Chinese
+      if (/[\u0400-\u04FF]/.test(text)) return 'ru';       // Cyrillic (Russian etc.)
+      if (/[\u0600-\u06FF]/.test(text)) return 'ar';       // Arabic
+      if (/[\u3040-\u30FF]/.test(text)) return 'ja';       // Japanese kana
+      if (/[\uAC00-\uD7AF]/.test(text)) return 'ko';       // Korean
+      if (/[\u0900-\u097F]/.test(text)) return 'hi';       // Devanagari (Hindi)
+      // Accented Latin letters common in French/Spanish/German/Portuguese —
+      // default to French since that's what's been seen in testing, better
+      // than falling back to plain English for a clearly non-English message.
+      if (/[àâäéèêëîïôöùûüçñõáíóúÀÂÄÉÈÊËÎÏÔÖÙÛÜÇÑÕÁÍÓÚ]/.test(text)) return 'fr';
+      return null;
+    }
+
     // Uses Google's public (unofficial, key-free) translate endpoint. This
     // is not Google's documented Cloud Translation API -- it's the same
     // free endpoint translate.google.com's own webpage uses, called
     // directly. No key, no cost, but also no uptime guarantee, so every
     // call has a fallback that just shows the original text if it fails.
-    function freeTranslate(text, targetLang, sourceLang) {
+    // Returns { text, detectedLang } so a single call can both translate
+    // and report what source language it detected.
+    function freeTranslateFull(text, targetLang, sourceLang) {
       sourceLang = sourceLang || 'auto';
       var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' +
         sourceLang + '&tl=' + targetLang + '&dt=t&q=' + encodeURIComponent(text);
       return fetch(url)
         .then(function (res) { return res.json(); })
         .then(function (data) {
-          // Response shape: [[["translated text","original text",null,null,...], ...], ...]
+          console.log('[bot-translate] raw response:', JSON.stringify(data).substring(0, 300));
+          var translated = null;
+          var detectedLang = null;
           if (data && data[0]) {
-            return data[0].map(function (chunk) { return chunk[0]; }).join('');
+            translated = data[0].map(function (chunk) { return chunk[0]; }).join('');
           }
-          return null;
+          // The detected source language has appeared at different indices
+          // across versions of this unofficial endpoint. Check the common
+          // ones defensively rather than assuming one fixed position.
+          if (typeof data[2] === 'string') {
+            detectedLang = data[2];
+          } else if (typeof data[8] === 'object' && data[8] && data[8][0] && data[8][0][0]) {
+            detectedLang = data[8][0][0];
+          }
+          console.log('[bot-translate] translated:', translated, '| detectedLang:', detectedLang);
+          return { text: translated, detectedLang: detectedLang };
         })
-        .catch(function () { return null; });
+        .catch(function (err) {
+          console.log('[bot-translate] request failed:', err);
+          return { text: null, detectedLang: null };
+        });
+    }
+
+    function freeTranslate(text, targetLang, sourceLang) {
+      return freeTranslateFull(text, targetLang, sourceLang).then(function (r) { return r.text; });
     }
 
     function detectLanguageCode(text) {
-      var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=' + encodeURIComponent(text);
-      return fetch(url)
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-          // Detected source language code is at data[2] in this endpoint's response.
-          return (data && data[2]) ? data[2] : null;
-        })
-        .catch(function () { return null; });
+      return freeTranslateFull(text, 'en', 'auto').then(function (r) { return r.detectedLang; });
     }
 
     // Section-navigation shortcuts recognized directly, before falling back
@@ -499,27 +530,28 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       if (looksNonEnglishNonBangla(rawQuestion)) {
-        // Likely a different language entirely. Translate the question to
-        // English, find the answer in the English knowledge base, then
-        // translate just that answer back for display. The knowledge base
-        // itself is never modified — only what's shown to this visitor.
-        detectLanguageCode(rawQuestion).then(function (langCode) {
-          freeTranslate(rawQuestion, 'en', 'auto').then(function (translatedQuestion) {
-            if (!translatedQuestion) {
-              // Translation service unreachable — fall back to English flow
-              // as a best effort rather than leaving the visitor stuck.
-              loadKnowledge(function (data) {
-                var match = data ? findAnswer(rawQuestion, data) : null;
-                setTimeout(function () { respondWithMatch(match, null, rawQuestion); }, 500);
-              });
-              return;
-            }
+        // Likely a different language entirely. One call both translates
+        // the question to English AND reports the detected source language,
+        // so the reply can be translated back into that same language. The
+        // knowledge base itself is never modified — only what's shown here.
+        freeTranslateFull(rawQuestion, 'en', 'auto').then(function (result) {
+          var translatedQuestion = result.text;
+          var langCode = result.detectedLang || guessLangFromScript(rawQuestion);
+
+          if (!translatedQuestion) {
+            // Translation service unreachable — fall back to English flow
+            // as a best effort rather than leaving the visitor stuck.
             loadKnowledge(function (data) {
-              var match = data ? findAnswer(translatedQuestion, data) : null;
-              setTimeout(function () {
-                respondWithMatch(match, langCode || null, translatedQuestion);
-              }, 500);
+              var match = data ? findAnswer(rawQuestion, data) : null;
+              setTimeout(function () { respondWithMatch(match, null, rawQuestion); }, 500);
             });
+            return;
+          }
+          loadKnowledge(function (data) {
+            var match = data ? findAnswer(translatedQuestion, data) : null;
+            setTimeout(function () {
+              respondWithMatch(match, langCode || null, translatedQuestion);
+            }, 500);
           });
         });
         return;
