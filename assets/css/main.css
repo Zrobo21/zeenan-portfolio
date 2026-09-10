@@ -130,9 +130,24 @@ html { scroll-behavior: smooth; }
   from { opacity: 0; transform: scale(0.94); }
   to { opacity: 1; transform: scale(1); }
 }
-@keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-30px); }
-  to { opacity: 1; transform: translateX(0); }
+@keyframes rotateIn3D {
+  from { opacity: 0; transform: perspective(1000px) rotateY(-25deg) rotateX(5deg) translateZ(-80px); }
+  to { opacity: 1; transform: perspective(1000px) rotateY(0deg) rotateX(0deg) translateZ(0); }
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: perspective(1200px) rotateX(4deg) translateY(20px); }
+  to { opacity: 1; transform: perspective(1200px) rotateX(0deg) translateY(0); }
+}
+@keyframes ripple {
+  from { transform: scale(0); opacity: 0.5; }
+  to { transform: scale(2.5); opacity: 0; }
+}
+
+/* Whole-page fade-in on load — makes navigation between pages feel
+   intentional instead of an abrupt flash of unstyled/styled content. */
+body {
+  animation: pageEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-style: preserve-3d;
 }
 
 .reveal {
@@ -145,24 +160,45 @@ html { scroll-behavior: smooth; }
 .reveal-delay-3 { animation-delay: 0.24s; }
 .reveal-delay-4 { animation-delay: 0.32s; }
 
-/* Elements animate in only once they're scrolled into view (JS toggles this) */
+/* Elements animate in only once they're scrolled into view (JS toggles this).
+   Uses a premium ease-out-back style curve instead of plain ease, so cards
+   settle into place with a touch of natural momentum rather than a flat glide. */
 .js-reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transform: translateY(28px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .js-reveal.in-view {
   opacity: 1;
   transform: translateY(0);
 }
 
+/* Staggered reveal within grids: each direct child of a grid/list container
+   gets a slightly later transition-delay than the one before it, so cards
+   cascade in one after another instead of all popping in simultaneously.
+   Applied via nth-child so no extra JS bookkeeping is needed. */
+.skills-grid .js-reveal:nth-child(1), .missions .js-reveal:nth-child(1),
+.certs-grid .js-reveal:nth-child(1), .gallery-grid .js-reveal:nth-child(1) { transition-delay: 0s; }
+.skills-grid .js-reveal:nth-child(2), .missions .js-reveal:nth-child(2),
+.certs-grid .js-reveal:nth-child(2), .gallery-grid .js-reveal:nth-child(2) { transition-delay: 0.08s; }
+.skills-grid .js-reveal:nth-child(3), .missions .js-reveal:nth-child(3),
+.certs-grid .js-reveal:nth-child(3), .gallery-grid .js-reveal:nth-child(3) { transition-delay: 0.16s; }
+.skills-grid .js-reveal:nth-child(4), .missions .js-reveal:nth-child(4),
+.certs-grid .js-reveal:nth-child(4), .gallery-grid .js-reveal:nth-child(4) { transition-delay: 0.24s; }
+.post-list .js-reveal:nth-child(1) { transition-delay: 0s; }
+.post-list .js-reveal:nth-child(2) { transition-delay: 0.06s; }
+.post-list .js-reveal:nth-child(3) { transition-delay: 0.12s; }
+.post-list .js-reveal:nth-child(4) { transition-delay: 0.18s; }
+.post-list .js-reveal:nth-child(5) { transition-delay: 0.24s; }
+
 /* Hero loads immediately on page load, not on scroll */
 .hero-tag { animation: fadeIn 0.6s ease both; }
-.hero h1 { animation: fadeUp 0.7s ease 0.1s both; }
-.hero-sub { animation: fadeUp 0.7s ease 0.2s both; }
-.hero-actions { animation: fadeUp 0.7s ease 0.3s both; }
-.stat-bar { animation: fadeUp 0.7s ease 0.4s both; }
-.hero-portrait-wrap { animation: scaleIn 0.8s ease 0.15s both; }
+.hero h1 { animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+.hero-sub { animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+.hero-actions { animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
+.stat-bar { animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both; }
+.hero-portrait-wrap { animation: rotateIn3D 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
 
 /* Skill bars fill on scroll-into-view */
 .skill-fill {
@@ -173,26 +209,66 @@ html { scroll-behavior: smooth; }
   width: var(--fill-width, 80%) !important;
 }
 
-/* Button press feedback */
+/* Button press feedback + ripple effect on click */
 .btn {
-  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 .btn:active { transform: scale(0.96); }
 .btn-primary:hover { box-shadow: 0 0 0 3px rgba(143,191,63,0.25); }
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  transform: scale(0);
+  pointer-events: none;
+  animation: ripple 0.6s ease-out;
+}
 
-/* Mission/cert/gallery cards lift slightly on hover */
-.mission-card, .cert-card, .gallery-item, .post-row {
-  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+/* ---------- 3D CARD TILT SYSTEM ---------- */
+/* Real 3D transforms (perspective + rotateX/Y + translateZ), not flat 2D
+   translate/scale. Each card gets a perspective container, and JS updates
+   --rx/--ry/--tz custom properties as the pointer moves across it, so the
+   card tilts to follow the cursor like it's a physical object catching
+   light — this is the actual depth effect, not a simulated shadow trick. */
+.mission-card, .cert-card, .gallery-item {
+  --rx: 0deg;
+  --ry: 0deg;
+  --tz: 0px;
+  transform-style: preserve-3d;
+  perspective: 800px;
+  transform: perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)) translateZ(var(--tz));
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.3s ease;
+  will-change: transform;
 }
-.mission-card:hover {
-  transform: translateY(-4px);
-  border-left-color: var(--gold);
+.mission-card:hover, .cert-card:hover, .gallery-item:hover {
+  --tz: 20px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.5);
 }
-.cert-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+.mission-card:hover { border-left-color: var(--gold); }
+
+/* Inner content lifts slightly further forward than the card shell itself,
+   using its own translateZ layer — genuine parallax depth between card
+   background and card content, visible as you tilt. */
+.mission-card > *, .cert-body > * {
+  transform: translateZ(24px);
+  transform-style: preserve-3d;
 }
-.post-row:hover { transform: translateX(4px); }
+
+.post-row {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.post-row:hover { transform: translateX(6px) translateZ(10px); }
+
+/* Smooth color/theme transitions already exist on body/nav/sections — this
+   extends the same treatment to buttons and form inputs so day/night mode
+   toggles never show a jarring instant color snap on interactive elements. */
+.btn, .form-group input, .form-group textarea, .country-code-select,
+.nav-toggle, .theme-toggle, .sound-toggle {
+  transition: background-color 0.35s ease, border-color 0.35s ease,
+              color 0.35s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
 
 /* Nav underline sweep */
 .nav-links a {
@@ -365,6 +441,20 @@ a:hover { text-decoration: underline; }
   aspect-ratio: 3/4;
   overflow: hidden;
   background: var(--bg-card);
+  --rx: 0deg;
+  --ry: 0deg;
+  transform-style: preserve-3d;
+  transform: perspective(1000px) rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.hero-portrait-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: translateZ(30px) scale(1.08);
+  transform-style: preserve-3d;
 }
 .hero-portrait-wrap::before {
   content: "";
@@ -372,12 +462,6 @@ a:hover { text-decoration: underline; }
   inset: 0;
   background: linear-gradient(180deg, transparent 60%, rgba(10,10,10,0.85) 100%);
   z-index: 1;
-}
-.hero-portrait-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 .hero-portrait-tag {
   position: absolute;

@@ -5,7 +5,7 @@
 - GTA-themed portfolio website (Hero, About, Certifications, Gallery, Skills, Services, Blog, Contact)
 - ১০টা ready-made blog post (প্রতিটায় ৫-৬টা FAQ সহ) — সাইট launch করলেই খালি দেখাবে না
 - Jekyll static site — GitHub Pages-এ ১০০% ফ্রি হোস্টিং
-- Auto-blog system — সপ্তাহে ২ বার নিজে থেকে নতুন SEO blog post লিখে পাবলিশ করে
+- Auto-blog system — প্রতিদিন নিজে থেকে ২-৩টা নতুন SEO blog post লিখে পাবলিশ করে
 - Multi-pass AI quality-check system — প্রতিটা পোস্ট স্কোর করে, দুর্বল হলে আবার rewrite করে
 - Sound effects (click/hover/section-load) + scroll animations
 - Privacy-safe, cookieless analytics option (কোনো visitor personal data সংগ্রহ হয় না)
@@ -119,7 +119,7 @@
 │   ├── reprioritize_keywords.py         → traffic অনুযায়ী keyword পুনর্বিন্যাস
 │   └── keywords.txt                     → keyword queue
 └── .github/workflows/
-    ├── auto-blog.yml                    → সপ্তাহে ২ বার blog লেখে
+    ├── auto-blog.yml                    → প্রতিদিন ২-৩টা blog লেখে
     └── deploy.yml                       → সাইট build ও publish করে
 ```
 

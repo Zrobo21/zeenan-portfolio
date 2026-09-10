@@ -12,13 +12,105 @@ document.addEventListener('DOMContentLoaded', function () {
     return '';
   })();
 
+  /* ---------- 3D CARD TILT (mouse-tracking, desktop/mouse only) ---------- */
+  var supports3DTilt = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (supports3DTilt) {
+    document.querySelectorAll('.mission-card, .cert-card, .gallery-item').forEach(function (card) {
+      var maxTilt = 10; // degrees — kept subtle so it reads as premium, not gimmicky
+
+      card.addEventListener('mousemove', function (e) {
+        var rect = card.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        var centerX = rect.width / 2;
+        var centerY = rect.height / 2;
+        var rotateY = ((x - centerX) / centerX) * maxTilt;
+        var rotateX = -((y - centerY) / centerY) * maxTilt;
+        card.style.setProperty('--rx', rotateX.toFixed(2) + 'deg');
+        card.style.setProperty('--ry', rotateY.toFixed(2) + 'deg');
+      });
+
+      card.addEventListener('mouseleave', function () {
+        card.style.setProperty('--rx', '0deg');
+        card.style.setProperty('--ry', '0deg');
+      });
+    });
+
+    // Hero portrait gets the same treatment but with a gentler max tilt,
+    // since it's a full portrait photo rather than a small card — a subtle
+    // parallax feel works better here than a dramatic flip.
+    var heroPortrait = document.querySelector('.hero-portrait-wrap');
+    if (heroPortrait) {
+      var heroMaxTilt = 6;
+      heroPortrait.addEventListener('mousemove', function (e) {
+        var rect = heroPortrait.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        var rotateY = ((x - rect.width / 2) / (rect.width / 2)) * heroMaxTilt;
+        var rotateX = -((y - rect.height / 2) / (rect.height / 2)) * heroMaxTilt;
+        heroPortrait.style.setProperty('--rx', rotateX.toFixed(2) + 'deg');
+        heroPortrait.style.setProperty('--ry', rotateY.toFixed(2) + 'deg');
+      });
+      heroPortrait.addEventListener('mouseleave', function () {
+        heroPortrait.style.setProperty('--rx', '0deg');
+        heroPortrait.style.setProperty('--ry', '0deg');
+      });
+    }
+  }
+
+  /* ---------- BUTTON RIPPLE EFFECT ---------- */
+  document.querySelectorAll('.btn').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      var rect = btn.getBoundingClientRect();
+      var ripple = document.createElement('span');
+      var size = Math.max(rect.width, rect.height);
+      ripple.className = 'btn-ripple';
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      btn.appendChild(ripple);
+      ripple.addEventListener('animationend', function () { ripple.remove(); });
+    });
+  });
+
+  /* ---------- SMOOTH PAGE TRANSITIONS ---------- */
+  // Fades the page out briefly before following internal links (same-site
+  // navigation like blog post links), so moving between pages feels like a
+  // continuous transition instead of an abrupt white/black flash cut.
+  document.querySelectorAll('a[href]').forEach(function (link) {
+    var href = link.getAttribute('href');
+    if (!href) return;
+    if (href.charAt(0) === '#') return; // skip pure in-page anchors
+    if (link.target === '_blank') return; // skip external/new-tab links
+    if (href.indexOf('http') === 0 && href.indexOf(window.location.hostname) === -1) return; // skip external domains
+    // Skip same-page anchor links (e.g. "/repo/#about" while already on
+    // that page) so the browser's native smooth anchor-scroll still runs
+    // instead of forcing a full page reload just to jump to a section.
+    var hashIndex = href.indexOf('#');
+    if (hashIndex > -1) {
+      var pathPart = href.substring(0, hashIndex);
+      var currentPath = window.location.pathname;
+      if (pathPart === '' || pathPart === currentPath || pathPart === currentPath.replace(/\/$/, '') + '/') {
+        return;
+      }
+    }
+    link.addEventListener('click', function (e) {
+      if (e.defaultPrevented) return; // another handler (e.g. bot nav) already took over
+      e.preventDefault();
+      document.body.style.transformStyle = 'preserve-3d';
+      document.body.style.transition = 'opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 1, 1)';
+      document.body.style.transform = 'perspective(1200px) rotateX(-4deg) translateY(-16px)';
+      document.body.style.opacity = '0';
+      setTimeout(function () { window.location.href = href; }, 280);
+    });
+  });
+
   var toggle = document.querySelector('.nav-toggle');
   var links = document.querySelector('.nav-links');
   if (toggle && links) {
     toggle.addEventListener('click', function () {
       links.classList.toggle('open');
-    });
-    links.querySelectorAll('a').forEach(function (a) {
+    });    links.querySelectorAll('a').forEach(function (a) {
       a.addEventListener('click', function () { links.classList.remove('open'); });
     });
   }
@@ -182,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!hasGreeted) {
         addBotMessage("Hey! I'm Zeenan's assistant. Ask me about services, certifications, pricing, or how to book a consultation — or I can take you straight to a section of the site.");
         setTimeout(function () {
-          addBotMessage("💬 Feel comfortable typing in your own language — we respect every language, and I'll do my best to reply in it too.");
+          addBotMessage("💬 I can currently chat in English and বাংলা (Bangla) — ask away in either!");
         }, 900);
         hasGreeted = true;
       }
@@ -362,68 +454,13 @@ document.addEventListener('DOMContentLoaded', function () {
       return (nonAsciiLetters / totalLetters) > 0.3;
     }
 
-    // Last-resort fallback if the translate endpoint's detected-language
-    // field can't be parsed for some reason: guess a language family from
-    // the Unicode script actually used, purely so the reply can still be
-    // translated into *something* reasonable rather than staying in English.
-    function guessLangFromScript(text) {
-      if (/[\u4E00-\u9FFF]/.test(text)) return 'zh-CN';   // Chinese
-      if (/[\u0400-\u04FF]/.test(text)) return 'ru';       // Cyrillic (Russian etc.)
-      if (/[\u0600-\u06FF]/.test(text)) return 'ar';       // Arabic
-      if (/[\u3040-\u30FF]/.test(text)) return 'ja';       // Japanese kana
-      if (/[\uAC00-\uD7AF]/.test(text)) return 'ko';       // Korean
-      if (/[\u0900-\u097F]/.test(text)) return 'hi';       // Devanagari (Hindi)
-      // Accented Latin letters common in French/Spanish/German/Portuguese —
-      // default to French since that's what's been seen in testing, better
-      // than falling back to plain English for a clearly non-English message.
-      if (/[àâäéèêëîïôöùûüçñõáíóúÀÂÄÉÈÊËÎÏÔÖÙÛÜÇÑÕÁÍÓÚ]/.test(text)) return 'fr';
-      return null;
-    }
-
-    // Uses Google's public (unofficial, key-free) translate endpoint. This
-    // is not Google's documented Cloud Translation API -- it's the same
-    // free endpoint translate.google.com's own webpage uses, called
-    // directly. No key, no cost, but also no uptime guarantee, so every
-    // call has a fallback that just shows the original text if it fails.
-    // Returns { text, detectedLang } so a single call can both translate
-    // and report what source language it detected.
-    function freeTranslateFull(text, targetLang, sourceLang) {
-      sourceLang = sourceLang || 'auto';
-      var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=' +
-        sourceLang + '&tl=' + targetLang + '&dt=t&q=' + encodeURIComponent(text);
-      return fetch(url)
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-          console.log('[bot-translate] raw response:', JSON.stringify(data).substring(0, 300));
-          var translated = null;
-          var detectedLang = null;
-          if (data && data[0]) {
-            translated = data[0].map(function (chunk) { return chunk[0]; }).join('');
-          }
-          // The detected source language has appeared at different indices
-          // across versions of this unofficial endpoint. Check the common
-          // ones defensively rather than assuming one fixed position.
-          if (typeof data[2] === 'string') {
-            detectedLang = data[2];
-          } else if (typeof data[8] === 'object' && data[8] && data[8][0] && data[8][0][0]) {
-            detectedLang = data[8][0][0];
-          }
-          console.log('[bot-translate] translated:', translated, '| detectedLang:', detectedLang);
-          return { text: translated, detectedLang: detectedLang };
-        })
-        .catch(function (err) {
-          console.log('[bot-translate] request failed:', err);
-          return { text: null, detectedLang: null };
-        });
-    }
-
-    function freeTranslate(text, targetLang, sourceLang) {
-      return freeTranslateFull(text, targetLang, sourceLang).then(function (r) { return r.text; });
-    }
-
-    function detectLanguageCode(text) {
-      return freeTranslateFull(text, 'en', 'auto').then(function (r) { return r.detectedLang; });
-    }
+    // Note: an earlier version of this bot attempted live translation via
+    // Google's free translate_a/single endpoint, called directly from the
+    // browser. That endpoint is blocked by CORS for any site other than
+    // Google's own properties, so it silently failed every time in
+    // production. No reliable free, keyless, CORS-friendly translation API
+    // exists as a replacement, so the bot now honestly limits itself to
+    // English and Bangla instead of pretending to support more.
 
     // Section-navigation shortcuts recognized directly, before falling back
     // to the knowledge base — lets the bot actually scroll the visitor there.
@@ -530,30 +567,17 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       if (looksNonEnglishNonBangla(rawQuestion)) {
-        // Likely a different language entirely. One call both translates
-        // the question to English AND reports the detected source language,
-        // so the reply can be translated back into that same language. The
-        // knowledge base itself is never modified — only what's shown here.
-        freeTranslateFull(rawQuestion, 'en', 'auto').then(function (result) {
-          var translatedQuestion = result.text;
-          var langCode = result.detectedLang || guessLangFromScript(rawQuestion);
-
-          if (!translatedQuestion) {
-            // Translation service unreachable — fall back to English flow
-            // as a best effort rather than leaving the visitor stuck.
-            loadKnowledge(function (data) {
-              var match = data ? findAnswer(rawQuestion, data) : null;
-              setTimeout(function () { respondWithMatch(match, null, rawQuestion); }, 500);
-            });
-            return;
-          }
-          loadKnowledge(function (data) {
-            var match = data ? findAnswer(translatedQuestion, data) : null;
-            setTimeout(function () {
-              respondWithMatch(match, langCode || null, translatedQuestion);
-            }, 500);
-          });
-        });
+        // Honest limitation: live browser-based translation via Google's
+        // free endpoint is blocked by CORS for sites like this one (it only
+        // works from Google's own properties), and no reliable free,
+        // keyless, CORS-friendly alternative exists. Rather than pretend to
+        // translate and fail silently, the bot says plainly what it can
+        // actually do: English and Bangla, full stop. Zeenan doesn't speak
+        // other languages either, so pointing to "contact Zeenan" wouldn't
+        // actually solve anything in this case.
+        setTimeout(function () {
+          addBotMessage("I can currently only understand English and বাংলা (Bangla) — I'm not able to reply in other languages yet. Feel free to try your question in one of those, or use the Google Translate icon in your browser to translate this page.");
+        }, 500);
         return;
       }
 
@@ -570,35 +594,26 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    // Shared responder: takes a {answer, navigate} match (or null), the
-    // English-form question (for nav-shortcut fallback matching), and an
-    // optional target language code to translate the OUTPUT into before
-    // displaying. English/Bangla-native answers pass null (no translation).
-    function respondWithMatch(match, translateToLang, englishQuestion) {
-      function showText(text, isNav) {
-        if (!translateToLang || translateToLang === 'en') {
-          addBotMessage(text);
-          return Promise.resolve();
-        }
-        return freeTranslate(text, translateToLang, 'en').then(function (translated) {
-          addBotMessage(translated || text); // fall back to English if translation fails
-        });
+    // Shared responder: takes a {answer, navigate} match (or null) and the
+    // question in its answerable form (English or Bangla — for nav-shortcut
+    // fallback matching when there's no direct knowledge-base hit).
+    function respondWithMatch(match, _unused, englishQuestion) {
+      function showText(text) {
+        addBotMessage(text);
       }
 
       if (match) {
-        showText(match.answer).then(function () {
-          if (match.navigate) {
-            setTimeout(function () {
-              var nav = match.navigate;
-              addNavPrompt(nav);
-            }, 900);
-          } else if (Math.random() < 0.3) {
-            setTimeout(function () {
-              var closing = closingMessages[Math.floor(Math.random() * closingMessages.length)];
-              showText(closing);
-            }, 1600);
-          }
-        });
+        showText(match.answer);
+        if (match.navigate) {
+          setTimeout(function () {
+            addNavPrompt(match.navigate);
+          }, 900);
+        } else if (Math.random() < 0.3) {
+          setTimeout(function () {
+            var closing = closingMessages[Math.floor(Math.random() * closingMessages.length)];
+            showText(closing);
+          }, 1600);
+        }
       } else {
         var navMatch = tryNavigate(englishQuestion || '');
         var fallback;
