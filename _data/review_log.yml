@@ -12,3 +12,17 @@
         point_of_view: 9
         factual_honesty: 10
       issues: []
+- date: "2026-09-12"
+  keyword: "how to rank a new website on Google"
+  file: "2026-09-12-how-to-rank-a-new-website-on-google-a-realistic-guide.md"
+  passes_run: 1
+  pass_details:
+    - pass: 1
+      average_score: 9.6
+      scores:
+        seo_structure: 9
+        humanization: 10
+        faq_depth: 9
+        point_of_view: 10
+        factual_honesty: 10
+      issues: []
