@@ -641,6 +641,34 @@ section { padding: 56px 0; border-bottom: 1px solid var(--line); }
 }
 .gallery-item:hover img { transform: scale(1.05); }
 
+/* ---------- TESTIMONIALS ---------- */
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+.testimonial-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--green);
+  padding: 28px;
+  position: relative;
+}
+.testimonial-quote {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  font-style: italic;
+  margin: 0 0 16px;
+}
+.testimonial-quote::before { content: "\201C"; color: var(--gold); font-size: 28px; line-height: 0; vertical-align: -6px; margin-right: 2px; }
+.testimonial-author {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--green);
+}
+
 /* ---------- PROJECTS / KEYWORD SAMPLES ---------- */
 .projects-intro {
   color: var(--ink-dim);

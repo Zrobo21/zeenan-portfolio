@@ -206,15 +206,59 @@ def extract_json(text):
     text = text.strip()
     text = re.sub(r"^```(json)?", "", text).strip()
     text = re.sub(r"```$", "", text).strip()
+
     try:
         return json.loads(text)
     except json.JSONDecodeError:
-        # Try to find the first { ... last } block as a fallback.
-        start = text.find("{")
-        end = text.rfind("}")
-        if start != -1 and end != -1:
-            return json.loads(text[start:end + 1])
-        raise
+        pass
+
+    # Fallback 1: find the first { ... last } block, in case there's any
+    # stray preamble/postamble text around the JSON object.
+    start = text.find("{")
+    end = text.rfind("}")
+    candidate = text[start:end + 1] if (start != -1 and end != -1) else text
+
+    try:
+        return json.loads(candidate)
+    except json.JSONDecodeError:
+        pass
+
+    # Fallback 2: Gemini occasionally returns raw (unescaped) newlines and
+    # tabs inside JSON string values -- valid as "readable text" but invalid
+    # JSON, since string values must escape control characters as \n / \t.
+    # This repair walks the text character by character, tracking whether
+    # we're inside a quoted string, and escapes any raw control character
+    # found there. It leaves whitespace outside of strings (formatting
+    # between JSON tokens) untouched.
+    repaired = []
+    in_string = False
+    escape_next = False
+    for ch in candidate:
+        if escape_next:
+            repaired.append(ch)
+            escape_next = False
+            continue
+        if ch == "\\" and in_string:
+            repaired.append(ch)
+            escape_next = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            repaired.append(ch)
+            continue
+        if in_string and ch == "\n":
+            repaired.append("\\n")
+            continue
+        if in_string and ch == "\t":
+            repaired.append("\\t")
+            continue
+        if in_string and ch == "\r":
+            repaired.append("\\r")
+            continue
+        repaired.append(ch)
+
+    repaired_text = "".join(repaired)
+    return json.loads(repaired_text)  # let this raise if still broken -- caller handles it
 
 
 def run_editor_pass(keyword, title, body, revision_focus=""):
@@ -346,20 +390,11 @@ def generate_featured_image(title, keyword):
         return None
 
 
-def main():
-    posts_per_run = int(os.environ.get("POSTS_PER_RUN", "1"))
-    posts_written = 0
-
-    for i in range(posts_per_run):
-        keywords = load_keywords()
-        if not keywords:
-            print("No keywords left in keywords.txt — add more before the next run.")
-            break
-
-        keyword = keywords[0]
-        remaining = keywords[1:]
-
-        print(f"\n=== Post {i + 1} of {posts_per_run} — keyword: {keyword} ===")
+def generate_one_post(keyword, remaining_keywords):
+    """Generates a single post for the given keyword. Returns True on
+    success (and saves the updated keyword queue), False on failure (leaves
+    the keyword queue untouched so this keyword is retried next run)."""
+    try:
         prompt = PROMPT_TEMPLATE.format(site_context=SITE_CONTEXT, keyword=keyword)
         raw = call_gemini(prompt)
         post = extract_json(raw)
@@ -433,11 +468,50 @@ def main():
         print(f"Wrote new post: {filepath}")
 
         log_review(keyword, all_passes, filename)
-        save_remaining_keywords(remaining)
-        posts_written += 1
-        print(f"{len(remaining)} keyword(s) left in queue.")
+        save_remaining_keywords(remaining_keywords)
+        print(f"{len(remaining_keywords)} keyword(s) left in queue.")
+        return True
 
-    print(f"\n=== Done: {posts_written} post(s) written this run ===")
+    except Exception as e:
+        # A single bad Gemini response (malformed JSON that couldn't be
+        # repaired, a missing field, a network hiccup, etc.) should not take
+        # down the whole run when generating multiple posts. Log it clearly,
+        # leave this keyword in the queue untouched (remaining_keywords is
+        # never saved here), and let the caller move on to the next post.
+        print(f"ERROR generating post for keyword '{keyword}': {type(e).__name__}: {e}")
+        print("This keyword stays in the queue and will be retried on the next run.")
+        return False
+
+
+def main():
+    posts_per_run = int(os.environ.get("POSTS_PER_RUN", "1"))
+    posts_written = 0
+    posts_failed = 0
+
+    for i in range(posts_per_run):
+        keywords = load_keywords()
+        if not keywords:
+            print("No keywords left in keywords.txt — add more before the next run.")
+            break
+
+        keyword = keywords[0]
+        remaining = keywords[1:]
+
+        print(f"\n=== Post {i + 1} of {posts_per_run} — keyword: {keyword} ===")
+        success = generate_one_post(keyword, remaining)
+        if success:
+            posts_written += 1
+        else:
+            posts_failed += 1
+
+    print(f"\n=== Done: {posts_written} post(s) written, {posts_failed} failed this run ===")
+
+    # Exit non-zero only if EVERY attempted post failed -- partial success
+    # (e.g. 2 out of 3 posts written) should still show green in Actions,
+    # since real progress was made and the workflow's commit step has
+    # something to push.
+    if posts_written == 0 and posts_failed > 0:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

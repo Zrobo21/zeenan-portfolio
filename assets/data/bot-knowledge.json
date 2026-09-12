@@ -1,121 +1,486 @@
 {
   "_readme": "This is the knowledge base for the site's chat assistant. Add or edit entries here — each has keywords to match, an answer, and an optional 'navigate' object ({targetId, label} for a same-page scroll, or {url, label} for a different page like the blog) that fires as a helpful follow-up after the answer. No sensitive personal data belongs here.",
-
   "capabilities": {
-    "keywords": ["what else", "what can you help", "how can you help", "what do you do", "help me with what", "your capabilities", "what can you answer", "what should i ask", "what can i ask"],
+    "keywords": [
+      "what else",
+      "what can you help",
+      "how can you help",
+      "what do you do",
+      "help me with what",
+      "your capabilities",
+      "what can you answer",
+      "what should i ask",
+      "what can i ask"
+    ],
     "answer": "I can tell you about Zeenan's services, certifications, pricing approach, worldwide availability, and how to book a consultation. I can also take you straight to the appointment form, contact section, projects, or blog. Try asking something like 'what services do you offer' or 'how do I book a call'!"
   },
   "identity": {
-    "keywords": ["who are you", "your name", "who is zeenan", "about you", "who made this", "what are you", "tell me about zeenan", "introduce yourself"],
+    "keywords": [
+      "who are you",
+      "your name",
+      "who is zeenan",
+      "about you",
+      "who made this",
+      "what are you",
+      "tell me about zeenan",
+      "introduce yourself"
+    ],
     "answer": "I'm Zeenan's assistant! Haa Meem Ul Karim Zeenan (goes by Zeenan) is a Digital Marketing Expert & Consultant, NSDA Level 3 certified, working with clients across Europe, America, and Asia."
   },
   "services": {
-    "keywords": ["service", "what do you offer", "what can zeenan do", "help with marketing", "what does zeenan do", "what kind of work", "specialize", "expertise", "what fields"],
+    "keywords": [
+      "service",
+      "what do you offer",
+      "what can zeenan do",
+      "help with marketing",
+      "what does zeenan do",
+      "what kind of work",
+      "specialize",
+      "expertise",
+      "what fields"
+    ],
     "answer": "Zeenan offers SEO (search engine optimization), content strategy & writing, keyword research, and social media marketing.",
-    "navigate": { "targetId": "services", "label": "the services section" }
+    "navigate": {
+      "targetId": "services",
+      "label": "the services section"
+    }
   },
   "seo_service": {
-    "keywords": ["seo service", "do seo", "seo help", "improve my ranking", "rank higher", "seo work"],
+    "keywords": [
+      "seo service",
+      "do seo",
+      "seo help",
+      "improve my ranking",
+      "rank higher",
+      "seo work"
+    ],
     "answer": "Yes — SEO is one of Zeenan's core services, covering on-page optimization, technical fixes, and content structure to help a site actually rank for what people search.",
-    "navigate": { "targetId": "services", "label": "the services section" }
+    "navigate": {
+      "targetId": "services",
+      "label": "the services section"
+    }
   },
   "content_strategy": {
-    "keywords": ["content strategy", "content writing", "blog writing service", "write content for me", "content marketing service"],
+    "keywords": [
+      "content strategy",
+      "content writing",
+      "blog writing service",
+      "write content for me",
+      "content marketing service"
+    ],
     "answer": "Content strategy and writing is one of Zeenan's core services — building content that targets real search intent instead of generic filler.",
-    "navigate": { "targetId": "services", "label": "the services section" }
+    "navigate": {
+      "targetId": "services",
+      "label": "the services section"
+    }
   },
   "social_media_service": {
-    "keywords": ["social media service", "manage my page", "facebook marketing", "instagram marketing", "social media help"],
+    "keywords": [
+      "social media service",
+      "manage my page",
+      "facebook marketing",
+      "instagram marketing",
+      "social media help"
+    ],
     "answer": "Social media marketing is part of Zeenan's services — strategy and content tailored to the platform your customers actually use.",
-    "navigate": { "targetId": "services", "label": "the services section" }
+    "navigate": {
+      "targetId": "services",
+      "label": "the services section"
+    }
   },
   "why_choose": {
-    "keywords": ["why should i choose", "why hire zeenan", "what makes you different", "why zeenan", "why should i take service", "why should i take", "why should i get", "should i choose", "why use zeenan"],
-    "answer": "Zeenan focuses on practical, data-backed strategy — real keyword research and SEO fundamentals — over generic advice or vanity metrics. NSDA Level 3 certified with a track record across international clients.",
-    "navigate": { "targetId": "services", "label": "the services section, so you can see exactly what's offered" }
+    "keywords": [
+      "why should i choose",
+      "why hire zeenan",
+      "what makes you different",
+      "why zeenan",
+      "why should i take service",
+      "why should i take",
+      "why should i get",
+      "should i choose",
+      "why use zeenan",
+      "reasons to hire"
+    ],
+    "answer": "A few solid reasons to hire Zeenan: he's certified (not self-declared) with NSDA Level 3, government-recognized, plus a Grade A+ Professional Digital Marketing certificate from Creative IT Institute. His approach is data-backed, not generic advice — real keyword research and on-page SEO built on actual search intent. His process is shown openly through anonymized real client samples (bakery, real estate). He's got international experience across Europe, America, and Asia despite being based in Bangladesh, keeps client work strictly confidential, and replies within 1-2 business days.",
+    "navigate": {
+      "targetId": "appointment",
+      "label": "the appointment form to get started"
+    }
   },
   "certifications": {
-    "keywords": ["certified", "certification", "qualification", "nsda", "credential", "degree", "trained", "qualified", "diploma"],
+    "keywords": [
+      "certified",
+      "certification",
+      "qualification",
+      "nsda",
+      "credential",
+      "degree",
+      "trained",
+      "qualified",
+      "diploma"
+    ],
     "answer": "Zeenan holds an NSDA (National Skills Development Authority, Bangladesh Government) Level 3 certification in Digital Marketing for Freelancing, plus a Professional Digital Marketing certificate (Grade A+) from Creative IT Institute.",
-    "navigate": { "targetId": "certifications", "label": "the certifications section" }
+    "navigate": {
+      "targetId": "certifications",
+      "label": "the certifications section"
+    }
   },
   "experience": {
-    "keywords": ["experience", "how long has zeenan", "years of experience", "background", "how experienced"],
+    "keywords": [
+      "experience",
+      "how long has zeenan",
+      "years of experience",
+      "background",
+      "how experienced"
+    ],
     "answer": "Zeenan is NSDA Level 3 certified in Digital Marketing and holds a Professional Digital Marketing certificate (Grade A+) from Creative IT Institute, with hands-on project experience across SEO, content, and social media.",
-    "navigate": { "targetId": "projects", "label": "the projects section" }
+    "navigate": {
+      "targetId": "projects",
+      "label": "the projects section"
+    }
   },
   "location": {
-    "keywords": ["where are you based", "location", "which country", "based in", "where is zeenan", "where do you work", "which city"],
+    "keywords": [
+      "where are you based",
+      "location",
+      "which country",
+      "based in",
+      "where is zeenan",
+      "where do you work",
+      "which city"
+    ],
     "answer": "Zeenan is based in Bangladesh and works with clients across Europe, America, and Asia — fully remote, so location isn't a barrier."
   },
   "contact": {
-    "keywords": ["contact", "email address", "reach you", "phone number", "whatsapp number", "get in touch", "talk to zeenan", "message zeenan"],
+    "keywords": [
+      "contact",
+      "email address",
+      "reach you",
+      "phone number",
+      "whatsapp number",
+      "get in touch",
+      "talk to zeenan",
+      "message zeenan"
+    ],
     "answer": "You can reach Zeenan by email, on WhatsApp, or through the appointment form on this site.",
-    "navigate": { "targetId": "contact", "label": "the contact section" }
+    "navigate": {
+      "targetId": "contact",
+      "label": "the contact section"
+    }
   },
   "appointment": {
-    "keywords": ["book", "appointment", "consultation", "meeting", "schedule a call", "hire zeenan", "work together", "start a project", "apply", "get started"],
+    "keywords": [
+      "book",
+      "appointment",
+      "consultation",
+      "meeting",
+      "schedule a call",
+      "hire zeenan",
+      "work together",
+      "start a project",
+      "apply",
+      "get started"
+    ],
     "answer": "You can apply for an appointment right on this site — just fill in your name, WhatsApp number, email, purpose, and goal, and Zeenan will get back to you within 1-2 business days.",
-    "navigate": { "targetId": "appointment", "label": "the appointment form" }
+    "navigate": {
+      "targetId": "appointment",
+      "label": "the appointment form"
+    }
   },
   "pricing": {
-    "keywords": ["price", "pricing", "cost", "how much", "rate", "charge", "fee", "budget", "expensive", "cheap", "affordable", "payment"],
+    "keywords": [
+      "price",
+      "pricing",
+      "cost",
+      "how much",
+      "rate",
+      "charge",
+      "fee",
+      "budget",
+      "expensive",
+      "cheap",
+      "affordable",
+      "payment"
+    ],
     "answer": "Pricing depends on the scope of work — every project is a little different. The best way to get an accurate quote is to book a quick consultation so Zeenan can understand what you need.",
-    "navigate": { "targetId": "appointment", "label": "the appointment form" }
+    "navigate": {
+      "targetId": "appointment",
+      "label": "the appointment form"
+    }
   },
   "seo_general": {
-    "keywords": ["what is seo", "seo mean", "search engine optimization", "explain seo", "seo basics", "how does seo work"],
+    "keywords": [
+      "what is seo",
+      "seo mean",
+      "search engine optimization",
+      "explain seo",
+      "seo basics",
+      "how does seo work"
+    ],
     "answer": "SEO (Search Engine Optimization) is the practice of improving a website so it ranks higher in search results and gets found by the right people. There's a whole blog on this site with practical SEO guides if you want to dig deeper.",
-    "navigate": { "url": "/blog/", "label": "the blog" }
+    "navigate": {
+      "url": "/blog/",
+      "label": "the blog"
+    }
   },
   "keyword_research": {
-    "keywords": ["keyword research", "keywords", "find keywords", "keyword strategy", "what is keyword research"],
+    "keywords": [
+      "keyword research",
+      "keywords",
+      "find keywords",
+      "keyword strategy",
+      "what is keyword research"
+    ],
     "answer": "Keyword research means figuring out exactly what your potential customers type into Google, so your content targets real search demand instead of guesswork.",
-    "navigate": { "targetId": "projects", "label": "the projects section for a real sample" }
+    "navigate": {
+      "targetId": "projects",
+      "label": "the projects section for a real sample"
+    }
   },
   "blog": {
-    "keywords": ["blog", "articles", "read more", "learn seo", "posts", "guides", "tutorials"],
+    "keywords": [
+      "blog",
+      "articles",
+      "read more",
+      "learn seo",
+      "posts",
+      "guides",
+      "tutorials"
+    ],
     "answer": "There's a full blog on this site covering SEO, keyword research, and digital marketing tips — great if you want to learn the fundamentals yourself.",
-    "navigate": { "url": "/blog/", "label": "the blog" }
+    "navigate": {
+      "url": "/blog/",
+      "label": "the blog"
+    }
   },
   "worldwide": {
-    "keywords": ["worldwide", "international", "other countries", "outside bangladesh", "global clients", "remote work", "abroad", "overseas"],
+    "keywords": [
+      "worldwide",
+      "international",
+      "other countries",
+      "outside bangladesh",
+      "global clients",
+      "remote work",
+      "abroad",
+      "overseas"
+    ],
     "answer": "Yes — Zeenan works with clients across Europe, America, and Asia, not just Bangladesh. All work is done remotely, so distance isn't an issue."
   },
   "response_time": {
-    "keywords": ["how long", "reply time", "response time", "when will you reply", "how fast", "turnaround", "how soon"],
+    "keywords": [
+      "how long",
+      "reply time",
+      "response time",
+      "when will you reply",
+      "how fast",
+      "turnaround",
+      "how soon"
+    ],
     "answer": "Zeenan typically responds within 1-2 business days after you submit the appointment form."
   },
   "greeting": {
-    "keywords": ["hello", "hi there", "hey", "good morning", "good evening", "yo", "sup", "hiya"],
+    "keywords": [
+      "hello",
+      "hi there",
+      "hey",
+      "good morning",
+      "good evening",
+      "yo",
+      "sup",
+      "hiya"
+    ],
     "answer": "Hey there! 👋 I'm Zeenan's assistant. Ask me about services, pricing, certifications, or say 'book' if you'd like to set up a consultation."
   },
   "thanks": {
-    "keywords": ["thank you", "thanks", "appreciate it", "great help", "awesome", "perfect"],
+    "keywords": [
+      "thank you",
+      "thanks",
+      "appreciate it",
+      "great help",
+      "awesome",
+      "perfect"
+    ],
     "answer": "You're very welcome! Don't hesitate to ask if anything else comes up. 🙌"
   },
   "portfolio_projects": {
-    "keywords": ["project", "case stud", "sample work", "past work", "examples", "portfolio", "clients worked with"],
+    "keywords": [
+      "project",
+      "case stud",
+      "sample work",
+      "past work",
+      "examples",
+      "portfolio",
+      "clients worked with"
+    ],
     "answer": "Client work stays confidential — Zeenan respects that fully. But there's a sample keyword research breakdown that shows the kind of process used before any content gets written.",
-    "navigate": { "targetId": "projects", "label": "the projects section" }
+    "navigate": {
+      "targetId": "projects",
+      "label": "the projects section"
+    }
   },
   "small_business": {
-    "keywords": ["small business", "local shop", "small shop", "startup help", "new business"],
+    "keywords": [
+      "small business",
+      "local shop",
+      "small shop",
+      "startup help",
+      "new business"
+    ],
     "answer": "Zeenan works with businesses of all sizes, including small and local shops — practical, budget-aware marketing rather than one-size-fits-all corporate strategy.",
-    "navigate": { "targetId": "appointment", "label": "the appointment form" }
+    "navigate": {
+      "targetId": "appointment",
+      "label": "the appointment form"
+    }
   },
   "ecommerce": {
-    "keywords": ["ecommerce", "online store", "online shop", "shopify", "woocommerce"],
+    "keywords": [
+      "ecommerce",
+      "online store",
+      "online shop",
+      "shopify",
+      "woocommerce"
+    ],
     "answer": "Yes, ecommerce SEO and content strategy fall within Zeenan's services — helping online stores get found by people actually ready to buy.",
-    "navigate": { "targetId": "services", "label": "the services section" }
+    "navigate": {
+      "targetId": "services",
+      "label": "the services section"
+    }
   },
   "languages": {
-    "keywords": ["what language", "speak english", "speak bangla", "communication language"],
+    "keywords": [
+      "what language",
+      "speak english",
+      "speak bangla",
+      "communication language"
+    ],
     "answer": "Zeenan communicates fluently in both English and Bangla, which is especially useful for businesses targeting Bangladeshi or South Asian audiences alongside international ones."
   },
   "process": {
-    "keywords": ["how does it work", "what is the process", "how do we start", "next steps", "how to begin"],
+    "keywords": [
+      "how does it work",
+      "what is the process",
+      "how do we start",
+      "next steps",
+      "how to begin"
+    ],
     "answer": "It starts with a quick consultation — book through the appointment form, and Zeenan will follow up to understand your goals before proposing a plan.",
-    "navigate": { "targetId": "appointment", "label": "the appointment form" }
+    "navigate": {
+      "targetId": "appointment",
+      "label": "the appointment form"
+    }
+  },
+  "testimonials": {
+    "keywords": [
+      "review",
+      "testimonial",
+      "client feedback",
+      "what do clients say",
+      "client review",
+      "past client experience"
+    ],
+    "answer": "Zeenan has received positive feedback from clients on professionalism, efficiency, and attention to detail. You can see a few client quotes in the 'What Clients Say' section.",
+    "navigate": {
+      "targetId": "testimonials",
+      "label": "the testimonials section"
+    }
+  },
+  "blog_rank_new_website": {
+    "keywords": [
+      "rank a new website",
+      "new website on google",
+      "rank new website step by step",
+      "how to rank a new website on google (ste"
+    ],
+    "answer": "\"How to Rank a New Website on Google (Step-by-Step)\" — Buying a domain and launching your site is the easy part. The real work begins when you try to get actual visitors from search engines — this post walks through the step-by-step process of ranking a brand-new website on Google. Published Sep 6, 2026. Read it here: https://zrobo21.github.io/zeenan-portfolio/blog/how-to-rank-a-new-website-on-google-step-by-step/"
+  },
+  "blog_invisible_bd": {
+    "keywords": [
+      "bangladeshi small businesses invisible",
+      "invisible on google bangladesh",
+      "why businesses not on google",
+      "why most bangladeshi small businesses ar"
+    ],
+    "answer": "\"Why Most Bangladeshi Small Businesses Are Invisible on Google (And How to Fix It)\" — Explores why long-trusted local businesses in places like Dhaka don't show up in Google search results, and practical fixes to become visible online. Published Sep 4, 2026. Read it here: https://zrobo21.github.io/zeenan-portfolio/blog/welcome-to-the-blog/"
+  },
+  "blog_free_keyword_research": {
+    "keywords": [
+      "free keyword research",
+      "keyword research no paid tools",
+      "keyword research without ahrefs",
+      "how to do keyword research for free (no "
+    ],
+    "answer": "\"How to Do Keyword Research for Free (No Paid Tools Needed)\" — Shows that keyword research doesn't require paid tools like Ahrefs or SEMrush — free methods can get the job done. Published Aug 28, 2026. Read it here: https://zrobo21.github.io/zeenan-portfolio/blog/keyword-research-for-free/"
+  },
+  "blog_facebook_seo": {
+    "keywords": [
+      "facebook page seo",
+      "facebook seo bangladesh",
+      "optimize facebook page",
+      "facebook page seo: getting found by bang"
+    ],
+    "answer": "\"Facebook Page SEO: Getting Found by Bangladeshi Customers Who Search\" — Covers how small businesses in Bangladesh can optimize their Facebook Page so it's actually found by customers searching for them. Published Aug 24, 2026. Read it here: https://zrobo21.github.io/zeenan-portfolio/blog/facebook-page-seo-bangladesh/"
+  },
+  "blog_consultant_role": {
+    "keywords": [
+      "what does a digital marketing consultant do",
+      "consultant job role",
+      "digital marketing consultant meaning",
+      "what does a digital marketing consultant"
+    ],
+    "answer": "\"What Does a Digital Marketing Consultant Actually Do?\" — Clears up the confusion around what a digital marketing consultant's job actually involves, beyond vague titles. Published Aug 20, 2026. Read it here: https://zrobo21.github.io/zeenan-portfolio/blog/what-is-digital-marketing-consultant/"
+  },
+  "blog_onpage_checklist": {
+    "keywords": [
+      "on page seo checklist",
+      "seo checklist beginners",
+      "on-page seo 2026",
+      "on-page seo checklist for beginners (202"
+    ],
+    "answer": "\"On-Page SEO Checklist for Beginners (2026 Edition)\" — A modern, non-recycled on-page SEO checklist for beginners, updated for 2026. Published Aug 16, 2026. Read it here: https://zrobo21.github.io/zeenan-portfolio/blog/on-page-seo-checklist/"
+  },
+  "blog_gbp_optimization": {
+    "keywords": [
+      "google business profile optimization",
+      "google my business optimization",
+      "gbp free tool",
+      "google business profile optimization: th"
+    ],
+    "answer": "\"Google Business Profile Optimization: The Free Tool Most Businesses Ignore\" — Explains why claiming and optimizing a Google Business Profile matters more than just having a Facebook Page. Published Aug 12, 2026. Read it here: https://zrobo21.github.io/zeenan-portfolio/blog/google-business-profile-optimization/"
+  },
+  "blog_low_budget_marketing": {
+    "keywords": [
+      "low budget marketing ideas",
+      "cheap marketing small shops",
+      "budget marketing bangladesh",
+      "low budget marketing ideas that actually"
+    ],
+    "answer": "\"Low Budget Marketing Ideas That Actually Work for Small Shops in Bangladesh\" — Practical, low-cost marketing ideas tailored for small shops that can't afford big-brand marketing budgets. Published Aug 8, 2026. Read it here: https://zrobo21.github.io/zeenan-portfolio/blog/low-budget-marketing-ideas-bangladesh/"
+  },
+  "blog_how_search_engines_rank": {
+    "keywords": [
+      "how search engines rank",
+      "how google decides rankings",
+      "search engine ranking factors",
+      "how search engines actually decide what "
+    ],
+    "answer": "\"How Search Engines Actually Decide What Ranks First\" — Breaks down what's actually happening behind the scenes when search engines decide rankings. Published Aug 4, 2026. Read it here: https://zrobo21.github.io/zeenan-portfolio/blog/how-search-engines-rank-websites/"
+  },
+  "blog_social_media_strategy": {
+    "keywords": [
+      "social media strategy small shops",
+      "realistic social media strategy",
+      "social media plan small business",
+      "a social media strategy small shops can "
+    ],
+    "answer": "\"A Social Media Strategy Small Shops Can Actually Stick To\" — A realistic social media strategy for small shop owners without a marketing team or content calendar tools. Published Jul 31, 2026. Read it here: https://zrobo21.github.io/zeenan-portfolio/blog/social-media-strategy-small-shops/"
+  },
+  "blog_common_seo_mistakes": {
+    "keywords": [
+      "common seo mistakes",
+      "seo mistakes small business",
+      "seo mistakes to avoid",
+      "common seo mistakes small businesses mak"
+    ],
+    "answer": "\"Common SEO Mistakes Small Businesses Make (And How to Fix Them)\" — Covers the small, avoidable mistakes that quietly hurt small business SEO, and how to fix them. Published Jul 27, 2026. Read it here: https://zrobo21.github.io/zeenan-portfolio/blog/common-seo-mistakes-small-businesses/"
   }
 }
